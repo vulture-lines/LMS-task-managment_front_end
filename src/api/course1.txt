@@ -1,0 +1,60 @@
+{
+  "title": "Full Stack Web Development",
+  "description": "Learn to build modern web applications using JavaScript, Node.js, and MongoDB.",
+  "thumbnail": "https://storage.googleapis.com/zions-788b3.appspot.com/Zion-Logo-1-300x155.png",
+  "price": 79999,
+  "mentor": "Sarankutty",
+  "lessons": [
+    {
+      "title": "Introduction to Web Development",
+      "sublessons": [
+        {
+          "title": "What is Web Development?",
+              "file": "https://storage.googleapis.com/zions-788b3.appspot.com/10.à®à®±à¯à®¯à®¿à®¯à®²à¯ à®ªà®¾à®à®®à¯ 1 à®ªà®¾à®à®®à¯ 10.mp3",
+                      "fileType": "audio/mpeg", 
+        },
+        {
+          "title": "Course Structure Overview",
+   "file": "https://storage.googleapis.com/zions-788b3.appspot.com/Theology - 10.pdf",
+                      "fileType": "application/pdf",
+        }
+      ]
+    },
+    {
+      "title": "Frontend Basics",
+      "sublessons": [
+        {
+          "title": "HTML Fundamentals",
+          "type": "doc",
+          "contentUrl": "https://example.com/docs/html-fundamentals.docx"
+        },
+        {
+          "title": "CSS Basics Quiz",
+          "type": "test",
+          "test": [
+            {
+              "question": "What does CSS stand for?",
+              "options": [
+                "Computer Style Sheets",
+                "Creative Style Sheets",
+                "Cascading Style Sheets",
+                "Colorful Style Sheets"
+              ],
+              "correctAnswer": "Cascading Style Sheets"
+            },
+            {
+              "question": "Which HTML tag is used to link an external CSS file?",
+              "options": [
+                "<script>",
+                "<style>",
+                "<link>",
+                "<css>"
+              ],
+              "correctAnswer": "<link>"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,287 @@
+[
+  {
+    "id": 1,
+    "title": "Full Stack Web Development",
+    "description": "Learn to build modern web applications using JavaScript, Node.js, and MongoDB.",
+    "thumbnail": "https://firebasestorage.googleapis.com/v0/b/zions-788b3.appspot.com/o/images%20(6).jpeg?alt=media&token=e89ffe03-e68d-48a9-8717-3a3fe1e43f4f ",
+    "price": 79999,
+    "mentor": "Sarankutty",
+    "lessons": [
+      {
+        "title": "Introduction to Web Development",
+        "sublessons": [
+          {
+            "title": "What is Web Development?",
+            "file": "https://storage.googleapis.com/zions-788b3.appspot.com/10.à®à®±à¯à®¯à®¿à®¯à®²à¯ à®ªà®¾à®à®®à¯ 1 à®ªà®¾à®à®®à¯ 10.mp3",
+            "fileType": "audio/mpeg"
+          },
+          {
+            "title": "Course Structure Overview",
+            "file": "https://storage.googleapis.com/zions-788b3.appspot.com/Theology - 10.pdf",
+            "fileType": "application/pdf"
+          },
+          {
+            "title": "Puli Puli",
+            "file": "https://storage.googleapis.com/zions-788b3.appspot.com/--Naalu%20Friends%20kooda%20Irunthale%20Poothum--Pasam%20Veika--friendship%20song%20whatsapp%20status--blackscreen--(720P_HD).mp4",
+            "fileType": "video/mp4"
+          }
+        ]
+      },
+      {
+        "title": "Frontend Basics",
+        "sublessons": [
+          {
+            "title": "HTML Fundamentals",
+            "type": "doc",
+            "contentUrl": "https://example.com/docs/html-fundamentals.docx"
+          },
+          {
+            "title": "CSS Basics Quiz",
+            "type": "test",
+            "test": [
+              {
+                "question": "What does CSS stand for?",
+                "options": [
+                  "Computer Style Sheets",
+                  "Creative Style Sheets",
+                  "Cascading Style Sheets",
+                  "Colorful Style Sheets"
+                ],
+                "correctAnswer": "Cascading Style Sheets"
+              },
+              {
+                "question": "Which HTML tag is used to link an external CSS file?",
+                "options": ["<script>", "<style>", "<link>", "<css>"],
+                "correctAnswer": "<link>"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Full Stack Web Development",
+    "description": "Learn to build modern web applications using JavaScript, Node.js, and MongoDB.",
+    "thumbnail": "https://thumbs.dreamstime.com/b/intellectual-property-law-books-gavel-desk-library-concept-legal-education-177296073.jpg",
+    "price": 79999,
+    "mentor": "Sarankutty",
+    "lessons": [
+      {
+        "title": "Introduction to Web Development",
+        "sublessons": [
+          {
+            "title": "What is Web Development?",
+            "file": "https://storage.googleapis.com/zions-788b3.appspot.com/10.à®à®±à¯à®¯à®¿à®¯à®²à¯ à®ªà®¾à®à®®à¯ 1 à®ªà®¾à®à®®à¯ 10.mp3",
+            "fileType": "audio/mpeg"
+          },
+          {
+            "title": "Course Structure Overview",
+            "file": "https://storage.googleapis.com/zions-788b3.appspot.com/Theology - 10.pdf",
+            "fileType": "application/pdf"
+          }
+        ]
+      },
+      {
+        "title": "Frontend Basics",
+        "sublessons": [
+          {
+            "title": "HTML Fundamentals",
+            "type": "doc",
+            "contentUrl": "https://example.com/docs/html-fundamentals.docx"
+          },
+          {
+            "title": "CSS Basics Quiz",
+            "type": "test",
+            "test": [
+              {
+                "question": "What does CSS stand for?",
+                "options": [
+                  "Computer Style Sheets",
+                  "Creative Style Sheets",
+                  "Cascading Style Sheets",
+                  "Colorful Style Sheets"
+                ],
+                "correctAnswer": "Cascading Style Sheets"
+              },
+              {
+                "question": "Which HTML tag is used to link an external CSS file?",
+                "options": ["<script>", "<style>", "<link>", "<css>"],
+                "correctAnswer": "<link>"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Full Stack Web Development",
+    "description": "Learn to build modern web applications using JavaScript, Node.js, and MongoDB.",
+    "thumbnail": "https://d3f1iyfxxz8i1e.cloudfront.net/courses/course_image/45a9b2395bed.jpg",
+    "price": 79999,
+    "mentor": "Sarankutty",
+    "lessons": [
+      {
+        "title": "Introduction to Web Development",
+        "sublessons": [
+          {
+            "title": "What is Web Development?",
+            "file": "https://storage.googleapis.com/zions-788b3.appspot.com/10.à®à®±à¯à®¯à®¿à®¯à®²à¯ à®ªà®¾à®à®®à¯ 1 à®ªà®¾à®à®®à¯ 10.mp3",
+            "fileType": "audio/mpeg"
+          },
+          {
+            "title": "Course Structure Overview",
+            "file": "https://storage.googleapis.com/zions-788b3.appspot.com/Theology - 10.pdf",
+            "fileType": "application/pdf"
+          }
+        ]
+      },
+      {
+        "title": "Frontend Basics",
+        "sublessons": [
+          {
+            "title": "HTML Fundamentals",
+            "type": "doc",
+            "contentUrl": "https://example.com/docs/html-fundamentals.docx"
+          },
+          {
+            "title": "CSS Basics Quiz",
+            "type": "test",
+            "test": [
+              {
+                "question": "What does CSS stand for?",
+                "options": [
+                  "Computer Style Sheets",
+                  "Creative Style Sheets",
+                  "Cascading Style Sheets",
+                  "Colorful Style Sheets"
+                ],
+                "correctAnswer": "Cascading Style Sheets"
+              },
+              {
+                "question": "Which HTML tag is used to link an external CSS file?",
+                "options": ["<script>", "<style>", "<link>", "<css>"],
+                "correctAnswer": "<link>"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Full Stack Web Development",
+    "description": "Learn to build modern web applications using JavaScript, Node.js, and MongoDB.",
+    "thumbnail": "https://firebasestorage.googleapis.com/v0/b/zions-788b3.appspot.com/o/images%20(6).jpeg?alt=media&token=e89ffe03-e68d-48a9-8717-3a3fe1e43f4f ",
+    "price": 79999,
+    "mentor": "Sarankutty",
+    "lessons": [
+      {
+        "title": "Introduction to Web Development",
+        "sublessons": [
+          {
+            "title": "What is Web Development?",
+            "file": "https://storage.googleapis.com/zions-788b3.appspot.com/10.à®à®±à¯à®¯à®¿à®¯à®²à¯ à®ªà®¾à®à®®à¯ 1 à®ªà®¾à®à®®à¯ 10.mp3",
+            "fileType": "audio/mpeg"
+          },
+          {
+            "title": "Course Structure Overview",
+            "file": "https://storage.googleapis.com/zions-788b3.appspot.com/Theology - 10.pdf",
+            "fileType": "application/pdf"
+          }
+        ]
+      },
+      {
+        "title": "Frontend Basics",
+        "sublessons": [
+          {
+            "title": "HTML Fundamentals",
+            "type": "doc",
+            "contentUrl": "https://example.com/docs/html-fundamentals.docx"
+          },
+          {
+            "title": "CSS Basics Quiz",
+            "type": "test",
+            "test": [
+              {
+                "question": "What does CSS stand for?",
+                "options": [
+                  "Computer Style Sheets",
+                  "Creative Style Sheets",
+                  "Cascading Style Sheets",
+                  "Colorful Style Sheets"
+                ],
+                "correctAnswer": "Cascading Style Sheets"
+              },
+              {
+                "question": "Which HTML tag is used to link an external CSS file?",
+                "options": ["<script>", "<style>", "<link>", "<css>"],
+                "correctAnswer": "<link>"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Full Stack Web Development",
+    "description": "Learn to build modern web applications using JavaScript, Node.js, and MongoDB.",
+    "thumbnail": "https://firebasestorage.googleapis.com/v0/b/zions-788b3.appspot.com/o/images%20(6).jpeg?alt=media&token=e89ffe03-e68d-48a9-8717-3a3fe1e43f4f ",
+    "price": 79999,
+    "mentor": "Sarankutty",
+    "lessons": [
+      {
+        "title": "Introduction to Web Development",
+        "sublessons": [
+          {
+            "title": "What is Web Development?",
+            "file": "https://storage.googleapis.com/zions-788b3.appspot.com/10.à®à®±à¯à®¯à®¿à®¯à®²à¯ à®ªà®¾à®à®®à¯ 1 à®ªà®¾à®à®®à¯ 10.mp3",
+            "fileType": "audio/mpeg"
+          },
+          {
+            "title": "Course Structure Overview",
+            "file": "https://storage.googleapis.com/zions-788b3.appspot.com/Theology - 10.pdf",
+            "fileType": "application/pdf"
+          }
+        ]
+      },
+      {
+        "title": "Frontend Basics",
+        "sublessons": [
+          {
+            "title": "HTML Fundamentals",
+            "type": "doc",
+            "contentUrl": "https://example.com/docs/html-fundamentals.docx"
+          },
+          {
+            "title": "CSS Basics Quiz",
+            "type": "test",
+            "test": [
+              {
+                "question": "What does CSS stand for?",
+                "options": [
+                  "Computer Style Sheets",
+                  "Creative Style Sheets",
+                  "Cascading Style Sheets",
+                  "Colorful Style Sheets"
+                ],
+                "correctAnswer": "Cascading Style Sheets"
+              },
+              {
+                "question": "Which HTML tag is used to link an external CSS file?",
+                "options": ["<script>", "<style>", "<link>", "<css>"],
+                "correctAnswer": "<link>"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
