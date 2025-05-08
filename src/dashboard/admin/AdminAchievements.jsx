@@ -47,49 +47,111 @@ const AdminAchievements = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  // Draw certificate on canvas
+  // // Draw certificate on canvas
+  // const drawCertificate = (canvas, achievement) => {
+  //   const ctx = canvas.getContext('2d');
+  //   canvas.width = 800;
+  //   canvas.height = 600;
+
+  //   // Background
+  //   ctx.fillStyle = '#f5f5f5';
+  //   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  //   // Border
+  //   ctx.strokeStyle = 'green';
+  //   ctx.lineWidth = 10;
+  //   ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+  //   // Certificate Title
+  //   ctx.fillStyle = '#000000';
+  //   ctx.font = 'bold 48px Arial';
+  //   ctx.textAlign = 'center';
+  //   ctx.fillText('Certificate of Achievement', canvas.width / 2, 100);
+
+  //   // Badge
+  //   // ctx.font = 'bold 36px Arial';
+  //   // ctx.fillStyle = achievement.badge.toLowerCase() === '#000000';
+  //   // ctx.fillText(achievement.badge.charAt(0).toUpperCase() + achievement.badge.slice(1), canvas.width / 2, 180);
+
+  //   // Title
+  //   ctx.font = '30px Arial';
+  //   ctx.fillStyle = '#000000';
+  //   ctx.fillText(achievement.title, canvas.width / 2, 250);
+
+  //   // Description
+  //   ctx.font = '24px Arial';
+  //   ctx.fillText(achievement.description, canvas.width / 2, 320);
+
+  //     // Badge
+  //     ctx.font = '30px Arial';
+  //     ctx.fillText(achievement.badge, canvas.width / 2, 360);
+
+  //   // Username
+  //   ctx.font = '28px Arial';
+  //   ctx.fillText(`Awarded to: ${achievement.username || 'Unknown'}`, canvas.width / 2, 400);
+
+  //   // Date
+  //   ctx.font = '24px Arial';
+  //   ctx.fillText(`Date: ${formatDate(achievement.assignedAt)}`, canvas.width / 2, 460);
+  // };
+
   const drawCertificate = (canvas, achievement) => {
     const ctx = canvas.getContext('2d');
-    canvas.width = 800;
+    canvas.width = 600;
     canvas.height = 600;
-
+  
     // Background
-    ctx.fillStyle = '#f5f5f5';
+    ctx.fillStyle = '#fff8dc'; // light parchment background
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Border
-    ctx.strokeStyle = 'green';
-    ctx.lineWidth = 10;
-    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-
-    // Certificate Title
+  
+    // Determine medal color based on badge
+    const badge = (achievement.badge || '').toLowerCase();
+    let medalColor = '#ffd700';   // default gold
+    let borderColor = '#b8860b';  // dark gold border
+  
+    if (badge === 'silver') {
+      medalColor = '#c0c0c0';
+      borderColor = '#a9a9a9';
+    } else if (badge === 'bronze') {
+      medalColor = '#cd7f32';
+      borderColor = '#8b5a2b';
+    }
+  
+    // Draw Medal Circle
+    const centerX = canvas.width / 2;
+    const centerY = 200;
+  
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 100, 0, 2 * Math.PI);
+    ctx.fillStyle = medalColor;
+    ctx.fill();
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 6;
+    ctx.stroke();
+  
+    // Badge Text
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 48px Arial';
+    ctx.font = 'bold 28px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('Certificate of Achievement', canvas.width / 2, 100);
-
-    // Badge
-    // ctx.font = 'bold 36px Arial';
-    // ctx.fillStyle = achievement.badge.toLowerCase() === '#000000';
-    // ctx.fillText(achievement.badge.charAt(0).toUpperCase() + achievement.badge.slice(1), canvas.width / 2, 180);
-
-    // Title
-    ctx.font = '30px Arial';
-    ctx.fillStyle = '#000000';
-    ctx.fillText(achievement.title, canvas.width / 2, 250);
-
-    // Description
+    ctx.fillText(badge.charAt(0).toUpperCase() + badge.slice(1), centerX, centerY + 10);
+  
+    // Award Title
     ctx.font = '24px Arial';
-    ctx.fillText(achievement.description, canvas.width / 2, 320);
-
+    ctx.fillText(achievement.title, centerX, 350);
+  
     // Username
-    ctx.font = '28px Arial';
-    ctx.fillText(`Awarded to: ${achievement.username || 'Unknown'}`, canvas.width / 2, 400);
-
+    ctx.font = '22px Arial';
+    ctx.fillText(`Awarded to: ${achievement.username || 'Unknown'}`, centerX, 400);
+  
+    // Description
+    ctx.font = '20px Arial';
+    ctx.fillText(achievement.description || '', centerX, 450);
+  
     // Date
-    ctx.font = '24px Arial';
-    ctx.fillText(`Date: ${formatDate(achievement.assignedAt)}`, canvas.width / 2, 460);
+    ctx.font = '18px Arial';
+    ctx.fillText(`Date: ${formatDate(achievement.assignedAt)}`, centerX, 500);
   };
+  
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -99,13 +161,13 @@ const AdminAchievements = () => {
         await UpdateTaskAchievement(currentAchievement._id, {
           title: data.title,
           description: data.description,
-          // badge: data.badge
+          badge: data.badge
         });
       } else {
         await CreateTaskAchievement({
           title: data.title,
           description: data.description,
-          // badge: data.badge,
+          badge: data.badge,
           userId: data.userId
         });
       }
@@ -128,7 +190,7 @@ const AdminAchievements = () => {
     reset({
       title: achievement.title,
       description: achievement.description,
-      // badge: achievement.badge,
+      badge: achievement.badge,
       userId: achievement.user
     });
   };
@@ -226,7 +288,7 @@ const AdminAchievements = () => {
               {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
             </div>
 
-            {/* <div>
+            <div>
               <label htmlFor="badge" className="block text-sm font-medium text-gray-700 mb-1">
                 Badge *
               </label>
@@ -242,7 +304,7 @@ const AdminAchievements = () => {
                 <option value="bronze">Bronze</option>
               </select>
               {errors.badge && <p className="text-red-500 text-sm mt-1">{errors.badge.message}</p>}
-            </div> */}
+            </div>
 
             <div>
               <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">

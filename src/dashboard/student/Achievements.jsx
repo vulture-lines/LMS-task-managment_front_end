@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Award } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
-import { GetCourseAchievementsByUserId } from '../../service/api'; // Import the new API function
+import {GetTaskAchievementsByUserId} from '../../service/api'; // Import the new API function
 
 // Utility function to format date
 const formatDate = (dateString) => {
@@ -52,19 +52,26 @@ const handleDownload = (achievement) => {
 };
 
 function Achievements() {
+  // Retrieve user info from localStorage
+  let userInfo = {};
+  try {
+    userInfo = JSON.parse(localStorage.getItem('loginData')) || {};
+  } catch (e) {
+    console.error('Failed to parse loginData:', e);
+  }
+  const authToken = userInfo.token;
+  const currentUserId = userInfo.user?._id;
+
   const [achievements, setAchievements] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  // Mock current user ID and token (replace with actual values from auth context)
-  const currentUserId = '680373b6c9e849266316e9da'; // Example: ajit1's ID
-  const authToken = 'your-jwt-token-here'; // Replace with actual token from auth context
-
+  
   useEffect(() => {
     const fetchAchievements = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await GetCourseAchievementsByUserId(currentUserId, authToken);
+        const data = await GetTaskAchievementsByUserId(currentUserId, authToken);
         setAchievements(data); // API already filters by userId, no client-side filtering needed
       } catch (err) {
         setError(err.message || 'Failed to load course achievements');
