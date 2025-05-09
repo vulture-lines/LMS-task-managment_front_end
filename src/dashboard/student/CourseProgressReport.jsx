@@ -53,7 +53,7 @@ function CourseProgressReport() {
 
   return (
     <>
-      <PageHeader title={"Course Progress"} />
+      <PageHeader title={"Tasks Progress"} />
       <div className="px-4 lg:px-8">
         <div className="flex flex-col lg:flex-row items-start justify-between lg:items-center mb-4 gap-4">
           <h3 className="text-bases font-medium">Report</h3>

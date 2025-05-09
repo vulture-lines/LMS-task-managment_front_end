@@ -5,35 +5,22 @@ const UserTask = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // State to store submission URL for each task
   const [submissionUrls, setSubmissionUrls] = useState({});
 
-  // Get current user from localStorage (replace with auth context if available)
   const loginData = JSON.parse(localStorage.getItem('loginData'));
-  const currentUserId = loginData?.userId || '680373b6c9e849266316e9da'; // Fallback user ID
-  const token = loginData?.token; // Token for API authentication
+  const currentUserId = loginData?.userId || '680373b6c9e849266316e9da';
+  const token = loginData?.token;
 
-  // Fetch tasks for the current user
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Check for valid authentication
-        if (!token) {
-          throw new Error('Please log in to view tasks');
-        }
-        if (!currentUserId) {
-          throw new Error('User ID is missing');
-        }
+        if (!token) throw new Error('Please log in to view tasks');
+        if (!currentUserId) throw new Error('User ID is missing');
 
         const response = await GetUserTasksById(currentUserId);
-
-        // Validate response is an array
-        if (!Array.isArray(response)) {
-          throw new Error('Invalid response format from server');
-        }
+        if (!Array.isArray(response)) throw new Error('Invalid response format from server');
 
         setTasks(response);
       } catch (err) {
@@ -47,7 +34,6 @@ const UserTask = () => {
     fetchTasks();
   }, [currentUserId, token]);
 
-  // Handle input change for submission URL
   const handleInputChange = (taskId, value) => {
     setSubmissionUrls((prev) => ({
       ...prev,
@@ -55,33 +41,23 @@ const UserTask = () => {
     }));
   };
 
-  // Handle task submission
   const handleSubmit = async (taskId) => {
     try {
       const url = submissionUrls[taskId] || '';
-
-      // Validate input
       if (!url) {
         alert('Please provide a submission URL.');
         return;
       }
 
-      // Prepare submission data
       const payload = {
         file: url,
         driveLink: '',
       };
 
-      // Call API to submit task
       await SubmitTask(taskId, payload, token);
-
-      // Refresh tasks after submission
       const response = await GetUserTasksById(currentUserId);
-      if (Array.isArray(response)) {
-        setTasks(response);
-      }
+      if (Array.isArray(response)) setTasks(response);
 
-      // Clear input for this task
       setSubmissionUrls((prev) => ({
         ...prev,
         [taskId]: '',
@@ -94,7 +70,6 @@ const UserTask = () => {
     }
   };
 
-  // Format date to DD/MM/YYYY
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -104,7 +79,6 @@ const UserTask = () => {
       .padStart(2, '0')}/${date.getFullYear()}`;
   };
 
-  // Handle retry on error
   const handleRetry = () => {
     setError(null);
     setLoading(true);
@@ -152,12 +126,27 @@ const UserTask = () => {
                     </div>
                   </div>
                 )}
-                {task.mySubmission ? (
+                {task.mySubmission && task.mySubmission.status !== 'resubmit' ? (
                   <div className="mt-2">
                     <p className="text-gray-600">Your Submission:</p>
-                    <p className="text-gray-500">
+                    <p className="text-gray-500 flex items-center">
                       Status: {task.mySubmission.status || 'N/A'}
-                      {task.mySubmission.markGiven && `, Marks: ${task.mySubmission.markGiven}`}
+                      {task.mySubmission.status.toLowerCase() === 'approved' && (
+                        <svg
+                          className="ml-2 w-5 h-5 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      )}
                     </p>
                     {task.mySubmission.file && (
                       <a
@@ -185,7 +174,9 @@ const UserTask = () => {
                   </div>
                 ) : (
                   <div className="mt-4">
-                    <p className="text-gray-600">Submit Your Task:</p>
+                    <p className="text-gray-600">
+                      {task.mySubmission ? 'Resubmit Your Task:' : 'Submit Your Task:'}
+                    </p>
                     <div className="space-y-2">
                       <input
                         type="url"
@@ -198,7 +189,7 @@ const UserTask = () => {
                         onClick={() => handleSubmit(task._id)}
                         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                       >
-                        Submit
+                        {task.mySubmission ? 'Resubmit' : 'Submit'}
                       </button>
                     </div>
                   </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreateTask, UploadFileTask, GetAllTasks, GetAllUsers, ReviewSubmission, GetTaskSubmissions, UpdateTask } from '../../service/api';
+import { CreateTask, UploadFileTask, GetAllTasks, GetAllUsers, ReviewSubmission, GetTaskSubmissions, UpdateTask } from '../../service/api'; // Removed CancelSubmission
 import { useNavigate } from 'react-router-dom';
 
 const AdminTask = () => {
@@ -24,6 +24,7 @@ const AdminTask = () => {
   const [expandedSubmission, setExpandedSubmission] = useState(null);
   const navigate = useNavigate();
 
+  // Utility to validate ObjectId
   const isValidObjectId = (id) => {
     return /^[0-9a-fA-F]{24}$/.test(id);
   };
@@ -40,7 +41,7 @@ const AdminTask = () => {
         }
 
         const tasks = await GetAllTasks();
-        console.log('Raw GetAllTasks response:', tasks); // Debug: Check if file field is included
+        console.log('GetAllTasks response:', tasks);
 
         const tasksWithSubmissions = await Promise.all(
           tasks.map(async (task) => {
@@ -63,27 +64,15 @@ const AdminTask = () => {
           })
         );
 
-        const normalizedTasks = (Array.isArray(tasksWithSubmissions) ? tasksWithSubmissions : []).map((task) => {
-          console.log(`Normalizing task ${task.title}, file:`, task.file); // Debug: Check file field during normalization
-          return {
-            ...task,
-            assignedTo: Array.isArray(task.assignedTo)
-              ? task.assignedTo.map((user) => ({
-                  user: typeof user === 'object' ? user.user || user._id : user,
-                  username: user.username || 'Unknown',
-                  status: user.status || 'not_submitted',
-                  markGiven: user.markGiven || null,
-                  reviewedBy: user.reviewedBy || null,
-                  submittedAt: user.submittedAt || null,
-                })).filter((user) => isValidObjectId(user.user))
-              : [],
-            file: task.file || null,
-            maxMarks: task.maxMarks || 100,
-            submissions: task.submissions || [],
-          };
-        });
+        const normalizedTasks = (Array.isArray(tasksWithSubmissions) ? tasksWithSubmissions : []).map((task) => ({
+          ...task,
+          assignedTo: Array.isArray(task.assignedTo)
+            ? task.assignedTo.map((user) => (typeof user === 'object' ? user._id || user : user)).filter(isValidObjectId)
+            : [],
+          file: task.file || null,
+          maxMarks: task.maxMarks || 100,
+        }));
         setAssignedTasks(normalizedTasks);
-        console.log('Normalized tasks with file:', normalizedTasks); // Debug: Verify file field in normalized tasks
 
         const userData = await GetAllUsers();
         console.log('Processed users:', userData);
@@ -208,7 +197,7 @@ const AdminTask = () => {
           const formData = new FormData();
           formData.append('file', taskData.pdfFile);
           const uploadResponse = await UploadFileTask(formData);
-          console.log('UploadFileTask response:', uploadResponse); // Debug: Check upload response
+          console.log('UploadFileTask response:', uploadResponse);
 
           if (typeof uploadResponse === 'string') {
             throw new Error(uploadResponse || 'File upload failed');
@@ -242,19 +231,10 @@ const AdminTask = () => {
       };
 
       const newTask = await CreateTask(apiTaskData);
-      console.log('CreateTask response:', newTask); // Debug: Check if file field is included
+      console.log('CreateTask response:', newTask);
       const normalizedTask = {
         ...newTask,
-        assignedTo: Array.isArray(newTask.assignedTo)
-          ? newTask.assignedTo.map((user) => ({
-              user: typeof user === 'object' ? user.user || user._id : user,
-              username: user.username || 'Unknown',
-              status: user.status || 'not_submitted',
-              markGiven: user.markGiven || null,
-              reviewedBy: user.reviewedBy || null,
-              submittedAt: user.submittedAt || null,
-            }))
-          : [],
+        assignedTo: Array.isArray(newTask.assignedTo) ? newTask.assignedTo : [],
         file: newTask.file || null,
         maxMarks: newTask.maxMarks || 100,
         submissions: [],
@@ -312,7 +292,7 @@ const AdminTask = () => {
           const formData = new FormData();
           formData.append('file', editTaskData.pdfFile);
           const uploadResponse = await UploadFileTask(formData);
-          console.log('UploadFileTask response (edit):', uploadResponse); // Debug: Check upload response
+          console.log('UploadFileTask response:', uploadResponse);
 
           if (typeof uploadResponse === 'string') {
             throw new Error(uploadResponse || 'File upload failed');
@@ -353,7 +333,7 @@ const AdminTask = () => {
       }
 
       const updatedTask = await UpdateTask(taskId, apiTaskData, token);
-      console.log('UpdateTask response:', updatedTask); // Debug: Check if file field is included
+      console.log('UpdateTask response:', updatedTask);
 
       setAssignedTasks((prev) =>
         prev.map((task) =>
@@ -361,16 +341,7 @@ const AdminTask = () => {
             ? {
                 ...task,
                 ...updatedTask,
-                assignedTo: Array.isArray(updatedTask.assignedTo)
-                  ? updatedTask.assignedTo.map((user) => ({
-                      user: typeof user === 'object' ? user.user || user._id : user,
-                      username: user.username || 'Unknown',
-                      status: user.status || 'not_submitted',
-                      markGiven: user.markGiven || null,
-                      reviewedBy: user.reviewedBy || null,
-                      submittedAt: user.submittedAt || null,
-                    }))
-                  : [],
+                assignedTo: Array.isArray(updatedTask.assignedTo) ? updatedTask.assignedTo : [],
                 file: updatedTask.file || null,
                 maxMarks: updatedTask.maxMarks || 100,
               }
@@ -429,18 +400,21 @@ const AdminTask = () => {
         return;
       }
 
+      console.log('Processing review for:', { taskId, userId, status: review.status, token });
+
+      // Update the submission with review details
       const reviewPayload = {
         status: review.status,
         markGiven: review.markGiven || 0,
         reviewNote: review.reviewNote,
       };
-
       await ReviewSubmission(taskId, userId, reviewPayload, token);
       setValidationMessages((prev) => [
         ...prev,
         { text: 'Review updated successfully.', type: 'success' },
       ]);
 
+      // Fetch updated submissions to reflect changes
       const updatedSubmissions = await GetTaskSubmissions(taskId);
       setAssignedTasks((prev) =>
         prev.map((task) =>
@@ -466,7 +440,7 @@ const AdminTask = () => {
       console.error('Review submission failed:', error);
       setValidationMessages((prev) => [
         ...prev,
-        { text: error.message || 'Failed to review submission', type: 'error' },
+        { text: error.message || 'Failed to process submission', type: 'error' },
       ]);
       if (error.message === 'Session expired. Please log in again.') {
         navigate('/login');
@@ -492,7 +466,9 @@ const AdminTask = () => {
 
   const startEditing = (task) => {
     console.log('Editing task:', task);
-    const assignedToIds = task.assignedTo.map((user) => user.user).filter(isValidObjectId);
+    const assignedToIds = Array.isArray(task.assignedTo)
+      ? task.assignedTo.map((user) => (typeof user === 'object' ? user._id || user : user)).filter(isValidObjectId)
+      : [];
     setEditTaskData({
       _id: task._id,
       title: task.title,
@@ -897,13 +873,18 @@ const AdminTask = () => {
                       </p>
                       <p className="text-gray-700">
                         Assigned to:{' '}
-                        {task.assignedTo.length > 0
-                          ? task.assignedTo.map((user) => user.username).join(', ')
+                        {Array.isArray(task.assignedTo) && task.assignedTo.length > 0
+                          ? task.assignedTo
+                              .map((userId) => {
+                                const user = users.find((u) => u._id === userId);
+                                return user ? user.username || user.name || user._id : 'Unknown User';
+                              })
+                              .join(', ')
                           : 'Admin'}
                       </p>
                       {task.file && (
                         <div className="mt-2">
-                          <h4 className="text-green-600 font-semibold">Admin Uploaded File:</h4>
+                          <h4 className="text-green-600 font-semibold">Attached File:</h4>
                           {task.file.endsWith('.pdf') ? (
                             <div className="mt-2 border rounded p-2">
                               <iframe
@@ -911,23 +892,10 @@ const AdminTask = () => {
                                 title={`File for ${task.title}`}
                                 className="w-full h-64"
                                 style={{ border: 'none' }}
-                                onError={() =>
-                                  setValidationMessages((prev) => [
-                                    ...prev,
-                                    { text: `Failed to load file for task ${task.title}.`, type: 'error' },
-                                  ])
-                                }
                               ></iframe>
                               <p className="text-gray-500 text-sm mt-1">
                                 Note: File preview may not be supported in all browsers.
                               </p>
-                              <a
-                                href={task.file}
-                                download
-                                className="text-blue-600 underline mt-2 block"
-                              >
-                                Download File
-                              </a>
                             </div>
                           ) : (
                             <div className="mt-2">
@@ -937,7 +905,7 @@ const AdminTask = () => {
                                 rel="noopener noreferrer"
                                 className="text-blue-600 underline"
                               >
-                                Download File
+                                View File
                               </a>
                             </div>
                           )}
@@ -974,7 +942,7 @@ const AdminTask = () => {
                                         className={`text-sm ${
                                           status === 'approved'
                                             ? 'text-green-600'
-                                            : status === 'rejected'
+                                            : status === 'resubmit'
                                             ? 'text-red-600'
                                             : 'text-gray-500'
                                         }`}
@@ -1119,7 +1087,7 @@ const AdminTask = () => {
                               reviewingTask.userId === submission.user && (
                                 <div key={submission.user}>
                                   <div className="mb-4">
-                                    <h6 className="text-gray-700 font-semibold">Submitted Files</h6>
+                                    <h6 className="text-gray-706 font-semibold">Submitted Files</h6>
                                     {(submission.file || submission.driveLink) ? (
                                       <div className="text-gray-600 text-sm">
                                         {submission.file && (
@@ -1158,8 +1126,7 @@ const AdminTask = () => {
                                       id={`reviewNote_${task._id}_${submission.user}`}
                                       value={
                                         reviewData[`${task._id}_${submission.user}`]?.reviewNote ||
-                                        submission.reviewNote ||
-                                        ''
+                                        submission.reviewNote || ''
                                       }
                                       onChange={(e) =>
                                         handleReviewChange(task._id, submission.user, 'reviewNote', e.target.value)
@@ -1174,8 +1141,7 @@ const AdminTask = () => {
                                     <select
                                       value={
                                         reviewData[`${task._id}_${submission.user}`]?.status ||
-                                        submission.status.toLowerCase() ||
-                                        ''
+                                        submission.status.toLowerCase() || ''
                                       }
                                       onChange={(e) =>
                                         handleReviewChange(task._id, submission.user, 'status', e.target.value)
@@ -1184,7 +1150,7 @@ const AdminTask = () => {
                                     >
                                       <option value="">Select status</option>
                                       <option value="approved">Approved</option>
-                                      <option value="rejected">Rejected</option>
+                                      <option value="resubmit">Resubmit</option>
                                     </select>
                                   </div>
                                   <div className="mb-4">
