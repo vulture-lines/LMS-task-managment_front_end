@@ -12,44 +12,44 @@ function StudentDashboard() {
   const [purchasedCoursesProgress, setPurchasedCoursesProgress] = useState([]);
   console.log(userInfo);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const userData = JSON.parse(localStorage.getItem("loginData"));
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const userData = JSON.parse(localStorage.getItem("loginData"));
 
-      try {
-        const data = await GetCourseEnrollment({ userId: userData.user._id });
+  //     try {
+  //       const data = await GetCourseEnrollment({ userId: userData.user._id });
 
-        const enrolledCourses = data.enrolledCourses || [];
-        const courseIds = enrolledCourses.map((item) => item.courseId._id);
+  //       const enrolledCourses = data.enrolledCourses || [];
+  //       const courseIds = enrolledCourses.map((item) => item.courseId._id);
 
-        setPurchasedCourses(courseIds);
+  //       setPurchasedCourses(courseIds);
 
-        const courseProgressArray = [];
+        // const courseProgressArray = [];
 
-        for (const course of enrolledCourses) {
-          const res = await GetCourseProgress(userData.user._id, course.courseId._id);
+        // for (const course of enrolledCourses) {
+        //   const res = await GetCourseProgress(userData.user._id, course.courseId._id);
 
           // const res = await GetCourseProgress({
           //   userId: userData.user._id,
           //   courseId: course.courseId._id,
           // });
 
-          courseProgressArray.push({
-            id: course.courseId._id,
-            title: course.courseId.title,
-            thumbnail: course.courseId.thumbnail,
-            percentage: res.progress?.percentage || 0,
-          });
-        }
+      //     courseProgressArray.push({
+      //       id: course.courseId._id,
+      //       title: course.courseId.title,
+      //       thumbnail: course.courseId.thumbnail,
+      //       percentage: res.progress?.percentage || 0,
+      //     });
+      //   }
 
-        setPurchasedCoursesProgress(courseProgressArray);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+      //   setPurchasedCoursesProgress(courseProgressArray);
+      // } catch (error) {
+      //   console.error("Error fetching data:", error);
+      // }
+    // };
 
-    fetchData();
-  }, []);
+    // fetchData();
+  // }, []);
 
   console.log("purchasedCoursesProgress", purchasedCoursesProgress);
   console.log("purchasedCourses", purchasedCourses);

@@ -17,6 +17,7 @@ function DashboardSidebar({ NavLinks }) {
       console.error("Logout error:", error);
       // alert("An error occurred during logout.");
     } finally {
+      localStorage.clear();
       navigate("/");
     }
   };

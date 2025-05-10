@@ -19,7 +19,7 @@ export default function Login() {
     },
     {
       url: "https://www.jjmccaskill.com/wp-content/uploads/2023/07/Difference-Between-Lawyer-and-Attorney.jpg",
-      text: `<a href="https://example.com/community" target="_blank">Join the GBU Mameey community</a>`,
+      text: `<a href="https://example.com/community" target="_blank">Join the LMS community</a>`,
     },
   ];
 
@@ -62,6 +62,7 @@ export default function Login() {
       }
     } catch (error) {
       console.log(error);
+      localStorage.removeItem("loginData");
     } finally {
       setLoading(false);
     }
