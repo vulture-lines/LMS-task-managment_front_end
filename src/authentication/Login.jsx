@@ -51,6 +51,7 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await AuthLogin(data);
+      if (res && res.user && res.user.role) {
       localStorage.setItem("loginData", JSON.stringify(res));
       console.log(res);
       if (res.user.role === "Mentor") {
@@ -60,13 +61,41 @@ export default function Login() {
         navigate("/student");
         window.location.reload();
       }
-    } catch (error) {
-      console.log(error);
-      localStorage.removeItem("loginData");
-    } finally {
-      setLoading(false);
+    } else {
+      console.error("Invalid login response:", res);
+      alert("Login failed. Please check your credentials.");
     }
-  };
+  } catch (error) {
+    console.error("Login error:", error);
+    localStorage.clear();
+    // localStorage.removeItem("loginData");
+    alert("Server error. Please try again later.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // const HandleLogin = async (data) => {
+  //   setLoading(true);
+  //   try {
+  //     const res = await AuthLogin(data);
+  //     localStorage.setItem("loginData", JSON.stringify(res));
+  //     console.log(res);
+  //     if (res.user.role === "Mentor") {
+  //       navigate("/admin");
+  //       window.location.reload();
+  //     } else if (res.user.role === "Student") {
+  //       navigate("/student");
+  //       window.location.reload();
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     localStorage.removeItem("loginData");
+  //     localStorage.clear();
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const HandleRegister = async (data) => {
     setLoading(true);
