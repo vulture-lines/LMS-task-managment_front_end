@@ -116,12 +116,12 @@ function StudentDashboard() {
         <div className="w-full flex-1 rounded-xl p-6 flex flex-col gap-4">
           <div className="flex justify-between items-center">
             <h3 className="mb-4 font-semibold">Task in Progress</h3>
-            <button
+            {/* <button
               className="text-base rounded-md px-3 py-1 bg-green-500 text-white hover:bg-green-600 hover:text-green-50"
               onClick={() => navigate("/student/course")}
             >
               View
-            </button>
+            </button> */}
           </div>
           <div className="flex gap-4">
             {purchasedCoursesProgress.map((course) => (
