@@ -53,8 +53,8 @@ const NewForumPostForm = ({ onSubmit, onCancel, onRefresh }) => {
     try {
       setLoading(true);
       const res = await UploadFile(formData);
-      setImageUrl(res.fileUrl);
-      setPreviewUrl(res.fileUrl);
+      setImageUrl(res.data.fileUrl);
+      setPreviewUrl(res.data.fileUrl);
       setError(null);
     } catch (err) {
       setError(err.message || "Failed to upload image");
