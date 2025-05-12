@@ -159,8 +159,10 @@ function Profile() {
         }
         return '';
       case 'education':
-        if (!/^\d*$/.test(value)) {
-          return 'Only numbers are allowed (e.g., years of education)';
+        if (!/^[A-Za-z\s.,]+$/.test(value)) {
+          return 'Only letters are allowed';
+        // if (!/^\d*$/.test(value)) {
+        //   return 'Only numbers are allowed (e.g., years of education)';
         }
         return '';
       default:
@@ -612,7 +614,7 @@ function Profile() {
                   <p className="col-span-2 text-sm text-gray-900">{profile.address || 'Not provided'}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Education (Years)</p>
+                  <p className="text-sm font-medium text-gray-500">Education</p>
                   <p className="col-span-2 text-sm text-gray-900">{profile.education || 'Not provided'}</p>
                 </div>
               </div>

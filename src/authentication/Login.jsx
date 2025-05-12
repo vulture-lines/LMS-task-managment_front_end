@@ -134,18 +134,31 @@ const Login = () => {
   // Handle Google Login (auth-code flow)
   const handleGoogleLogin = useGoogleLogin({
     flow: "auth-code",
-    redirect_uri: window.location.origin,
-    onSuccess: async (codeResponse) => {
-      setLoading(true);
-      setValidationMessages([]);
-      try {
-        const res = await AuthGoogleLogin({ code: codeResponse.code });
+  redirect_uri: window.location.origin,
+  onSuccess: async (codeResponse) => {
+    setLoading(true);
+    setValidationMessages([]);
+    try {
+      // Try to sign up with the Google code
+      const res = await AuthGoogleSignup({ code: codeResponse.code });
+
+      // Check if the response contains a user object and the approval status
+      if (res && res.user && !res.user.isApproved) {
+        // If the user is not approved, show a message and redirect them to the login page
+        setValidationMessages((prev) => [
+          ...prev,
+          { text: "Account successfully created. Your account is pending approval.", type: "info" },
+        ]);
+        localStorage.setItem("signupData", JSON.stringify(res)); // Store signup data temporarily
+        navigate("/login");  // Redirect to login page
+      } else {
+        // If the user is approved, log them in
         localStorage.setItem("loginData", JSON.stringify(res));
         setValidationMessages((prev) => [
           ...prev,
-          { text: "Successfully logged in with Google", type: "success" },
+          { text: "Successfully signed up and logged in with Google!", type: "success" },
         ]);
-        setTimeout(() => {
+         setTimeout(() => {
           if (res.user.role === "Mentor") {
             navigate("/admin");
             window.location.reload();
@@ -154,74 +167,127 @@ const Login = () => {
             window.location.reload();
           }
         }, 1000);
-      } catch (error) {
-        const errorMessages = Array.isArray(error.message)
-          ? error.message
-          : [error.message || "Google login failed. Please try again."];
-        setValidationMessages((prev) => [
-          ...prev,
-          ...errorMessages.map((msg) => ({ text: msg, type: "error" })),
-        ]);
-        localStorage.removeItem("loginData");
-        localStorage.clear();
-      } finally {
-        setLoading(false);
       }
-    },
-    onError: () => {
+    } catch (error) {
+      const errorMessages = Array.isArray(error.message)
+        ? error.message
+        : [error.message || "Google signup failed. Please try again."];
       setValidationMessages((prev) => [
         ...prev,
-        { text: "Google login failed. Please try again.", type: "error" },
+        ...errorMessages.map((msg) => ({ text: msg, type: "error" })),
       ]);
-    },
-  });
+    } finally {
+      setLoading(false);
+    }
+  },
+  onError: () => {
+    setValidationMessages((prev) => [
+      ...prev,
+      { text: "Google signup failed. Please try again.", type: "error" },
+    ]);
+  },
+});
+
+  //   flow: "auth-code",
+  //   redirect_uri: window.location.origin,
+  //   onSuccess: async (codeResponse) => {
+  //     setLoading(true);
+  //     setValidationMessages([]);
+  //     try {
+  //       const res = await AuthGoogleLogin({ code: codeResponse.code });
+  //       localStorage.setItem("loginData", JSON.stringify(res));
+  //       setValidationMessages((prev) => [
+  //         ...prev,
+  //         { text: "Successfully logged in with Google", type: "success" },
+  //       ]);
+  //       setTimeout(() => {
+  //         if (res.user.role === "Mentor") {
+  //           navigate("/admin");
+  //           window.location.reload();
+  //         } else if (res.user.role === "Student") {
+  //           navigate("/student");
+  //           window.location.reload();
+  //         }
+  //       }, 1000);
+  //     } catch (error) {
+  //       const errorMessages = Array.isArray(error.message)
+  //         ? error.message
+  //         : [error.message || "Google login failed. Please try again."];
+  //       setValidationMessages((prev) => [
+  //         ...prev,
+  //         ...errorMessages.map((msg) => ({ text: msg, type: "error" })),
+  //       ]);
+  //       localStorage.removeItem("loginData");
+  //       localStorage.clear();
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   },
+  //   onError: () => {
+  //     setValidationMessages((prev) => [
+  //       ...prev,
+  //       { text: "Google login failed. Please try again.", type: "error" },
+  //     ]);
+  //   },
+  // });
 
   // Handle Google Signup (auth-code flow)
   const handleGoogleSignup = useGoogleLogin({
-    flow: "auth-code",
-    redirect_uri: window.location.origin,
-    onSuccess: async (codeResponse) => {
-      setLoading(true);
-      setValidationMessages([]);
-      // Validate username for signup
-      if (!username || signupErrors.username) {
+  flow: "auth-code",
+  redirect_uri: window.location.origin,
+  onSuccess: async (codeResponse) => {
+    setLoading(true);
+    setValidationMessages([]);
+    try {
+      // Try to sign up with the Google code
+      const res = await AuthGoogleSignup({ code: codeResponse.code });
+
+      // Check if the response contains a user object and the approval status
+      if (res && res.user && !res.user.isApproved) {
+        // If the user is not approved, show a message and redirect them to the login page
         setValidationMessages((prev) => [
           ...prev,
-          { text: "Please enter a valid username", type: "error" },
+          { text: "Account successfully created. Your account is pending approval.", type: "info" },
         ]);
-        setLoading(false);
-        return;
-      }
-      try {
-        const res = await AuthGoogleSignup({ code: codeResponse.code, username });
+        localStorage.setItem("signupData", JSON.stringify(res)); // Store signup data temporarily
+        navigate("/login");  // Redirect to login page
+      } else {
+        // If the user is approved, log them in
         localStorage.setItem("loginData", JSON.stringify(res));
         setValidationMessages((prev) => [
           ...prev,
-          { text: "Successfully signed up with Google", type: "success" },
+          { text: "Successfully signed up and logged in with Google!", type: "success" },
         ]);
-        setTimeout(() => {
-          setShowWelcomeScreen(true);
-          setShowSignup(false);
+         setTimeout(() => {
+          if (res.user.role === "Mentor") {
+            navigate("/admin");
+            window.location.reload();
+          } else if (res.user.role === "Student") {
+            navigate("/student");
+            window.location.reload();
+          }
         }, 1000);
-      } catch (error) {
-        const errorMessages = Array.isArray(error.message)
-          ? error.message
-          : [error.message || "Google signup failed. Please try again."];
-        setValidationMessages((prev) => [
-          ...prev,
-          ...errorMessages.map((msg) => ({ text: msg, type: "error" })),
-        ]);
-      } finally {
-        setLoading(false);
       }
-    },
-    onError: () => {
+    } catch (error) {
+      const errorMessages = Array.isArray(error.message)
+        ? error.message
+        : [error.message || "Google signup failed. Please try again."];
       setValidationMessages((prev) => [
         ...prev,
-        { text: "Google signup failed. Please try again.", type: "error" },
+        ...errorMessages.map((msg) => ({ text: msg, type: "error" })),
       ]);
-    },
-  });
+    } finally {
+      setLoading(false);
+    }
+  },
+  onError: () => {
+    setValidationMessages((prev) => [
+      ...prev,
+      { text: "Google signup failed. Please try again.", type: "error" },
+    ]);
+  },
+});
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
