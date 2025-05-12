@@ -63,6 +63,7 @@ function UserManagement() {
     setEditingUserId(userId);
     setEditedUserData({ ...user });
     setShowUserDetails(true);
+    setIsViewing(false);
     setError(null);
   };
 
@@ -87,6 +88,11 @@ function UserManagement() {
     setIsLoading(true);
     try {
       const updatedUser = await UpdateUserById(userId, editedUserData);
+      // Update role if changed
+      if (editedUserData.role && editedUserData.role !== users.find((u) => u._id === userId).role) {
+        await ChangeUserRole(userId, editedUserData.role);
+        updatedUser.role = editedUserData.role;
+      }
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user._id === userId ? { ...user, ...updatedUser } : user
@@ -108,6 +114,7 @@ function UserManagement() {
     setEditingUserId(null);
     setEditedUserData({});
     setShowUserDetails(false);
+    setIsViewing(false);
     setError(null);
   };
 
@@ -235,7 +242,7 @@ function UserManagement() {
                     <input
                       type="date"
                       name="dob"
-                      value={editedUserData.dob || ""}
+                      value={editedUserData.dob ? new Date(editedUserData.dob).toISOString().split('T')[0] : ""}
                       onChange={handleInputChange}
                       className="w-full border border-gray-300 rounded-md p-2 bg-gray-100"
                       disabled={isLoading}
@@ -447,7 +454,8 @@ function UserManagement() {
                         <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{user.username}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{user.dob}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-gray-700">{user.dob ? new Date(user.dob).toLocaleDateString() : ''}</td>
+                        {/* <td className="px-6 py-4 whitespace-nowrap">{user.dob}</td> */}
                         <td className="px-6 py-4 whitespace-nowrap">{user.gender}</td>
                         <td className="px-6 py-4 whitespace-nowrap">{user.role}</td>
                         <td className="px-6 py-4 whitespace-nowrap">

@@ -1,370 +1,240 @@
-import React, { useState, useEffect } from 'react';
-import { GetAllQueries, UpdateQuery, DeleteQuery } from '../../service/api';
+import { useState, useEffect, useRef } from "react";
+import { GetAllUsers, GetConversationMessages, SendMessage } from "../../service/api";
+import PageHeader from "../../components/PageHeader";
 
-const AdminQueriesPage = () => {
-  const [queries, setQueries] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [currentQuery, setCurrentQuery] = useState(null);
+function ChatSystem() {
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [formData, setFormData] = useState({
-    meetingLink: '',
-    meetingTime: '',
-    expiresAt: '',
-    responseMessage: '',
-    notes: ''
-  });
+  const messagesEndRef = useRef(null);
+  const Token = JSON.parse(localStorage.getItem("loginData"));
 
-  // Fetch all queries using GetAllQueries API
+  // Default profile picture URL
+  const defaultProfilePic = "https://t3.ftcdn.net/jpg/06/33/54/78/360_F_633547842_AugYzexTpMJ9z1YcpTKUBoqBF0CUCk10.jpg";
+
+  // Redirect to login if not authenticated
   useEffect(() => {
-    const fetchQueries = async () => {
+    if (!Token?.token) {
+      window.location.href = "/login";
+    }
+  }, []);
+
+  // Scroll to bottom of messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Fetch users
+  useEffect(() => {
+    const fetchUsers = async () => {
       setIsLoading(true);
-      setError(null);
       try {
-        const data = await GetAllQueries();
-        setQueries(data);
+        const response = await GetAllUsers();
+        setUsers(response.data || response);
+        setError(null);
       } catch (err) {
-        setError(err.message || "Failed to load queries");
+        setError(err.message || "Failed to load users");
       } finally {
         setIsLoading(false);
       }
     };
-    fetchQueries();
+    fetchUsers();
   }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+  // Fetch messages for selected user
+  const fetchMessages = async (userId) => {
+    setIsLoading(true);
+    try {
+      const response = await GetConversationMessages(userId);
+      setMessages(response);
+      setError(null);
+    } catch (err) {
+      setError(err.message || "Failed to load messages");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSubmit = async (e) => {
+  // Handle user selection
+  const handleSelectUser = (user) => {
+    setSelectedUser(user);
+    fetchMessages(user._id);
+  };
+
+  // Handle sending a message
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+    if (!newMessage.trim() || !selectedUser) return;
 
+    setIsLoading(true);
     try {
-      if (currentQuery) {
-        // Update existing query
-        const updateData = {
-          meetingLink: formData.meetingLink,
-          meetingTime: formData.meetingTime,
-          expiresAt: formData.expiresAt,
-          responseMessage: formData.responseMessage,
-          notes: formData.notes
-        };
-        const updatedQuery = await UpdateQuery(currentQuery._id, updateData);
-        setQueries(queries.map(query =>
-          query._id === updatedQuery.ticket._id ? updatedQuery.ticket : query
-        ));
-      }
-      resetForm();
+      const response = await SendMessage({
+        receiver: selectedUser._id,
+        text: newMessage,
+      });
+      setMessages([...messages, response.data]);
+      setNewMessage("");
+      setError(null);
     } catch (err) {
-      setError(err.message || "Failed to update query");
+      setError(err.message || "Failed to send message");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      meetingLink: '',
-      meetingTime: '',
-      expiresAt: '',
-      responseMessage: '',
-      notes: ''
-    });
-    setShowForm(false);
-    setCurrentQuery(null);
-  };
-
-  const handleEdit = (query) => {
-    setCurrentQuery(query);
-    setFormData({
-      meetingLink: query.meetingLink || '',
-      meetingTime: query.meetingTime || '',
-      expiresAt: query.expiresAt || '',
-      responseMessage: query.responseMessage || '',
-      notes: query.notes || ''
-    });
-    setShowForm(true);
-  };
-
-  const handleDelete = async (id) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await DeleteQuery(id);
-      setQueries(queries.filter(query => query._id !== id));
-    } catch (err) {
-      setError(err.message || "Failed to delete query");
-    } finally {
-      setIsLoading(false);
-    }
+  // Handle closing the chat
+  const handleCloseChat = () => {
+    setSelectedUser(null);
+    setMessages([]);
   };
 
   return (
-    <div className="container mx-auto px-4 py-4 sm:py-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Admin Queries Management</h1>
-      </div>
-
+    <>
+      <PageHeader title="Chat System" />
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 sm:mb-6 text-sm sm:text-base">
+        <div className="p-4 bg-red-100 text-red-700 rounded-lg mb-4 mx-4">
           {error}
         </div>
       )}
-
       {isLoading && (
-        <div className="text-center text-gray-500 py-4 text-sm sm:text-base">Loading...</div>
-      )}
-
-      {showForm && (
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
-          <h2 className="text-lg sm:text-xl font-semibold mb-4">Update Query</h2>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Meeting Link
-                </label>
-                <input
-                  type="text"
-                  name="meetingLink"
-                  value={formData.meetingLink}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base"
-                  placeholder="e.g., https://meet.google.com/rdj-fmkb-huk"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Meeting Time (Unix timestamp)
-                </label>
-                <input
-                  type="number"
-                  name="meetingTime"
-                  value={formData.meetingTime}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base"
-                  placeholder="e.g., 12"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Expires At (Unix timestamp)
-                </label>
-                <input
-                  type="number"
-                  name="expiresAt"
-                  value={formData.expiresAt}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base"
-                  placeholder="e.g., 9"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Response Message
-                </label>
-                <input
-                  type="text"
-                  name="responseMessage"
-                  value={formData.responseMessage}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base"
-                  placeholder="e.g., attend the meeting"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
-                </label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm sm:text-base"
-                  placeholder="e.g., none"
-                />
-              </div>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-              <button
-                type="submit"
-                className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm sm:text-base"
-                disabled={isLoading}
-              >
-                Update
-              </button>
-              <button
-                type="button"
-                onClick={resetForm}
-                className="w-full sm:w-auto px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 text-sm sm:text-base"
-                disabled={isLoading}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+        <div className="p-4 bg-green-100 text-green-700 rounded-lg mb-4 mx-4">
+          Loading...
         </div>
       )}
 
-      {/* Desktop Table View */}
-      <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <thead>
-            <tr className="bg-green-500 text-white uppercase text-xs sm:text-sm">
-              <th className="px-4 sm:px-6 py-3 text-left">Student Name</th>
-              <th className="px-4 sm:px-6 py-3 text-left">Title</th>
-              <th className="px-4 sm:px-6 py-3 text-left">Issue</th>
-              <th className="px-4 sm:px-6 py-3 text-left">Course ID</th>
-              <th className="px-4 sm:px-6 py-3 text-left">Course Title</th>
-              <th className="px-4 sm:px-6 py-3 text-left">Status</th>
-              <th className="px-4 sm:px-6 py-3 text-left">Mentor</th>
-              <th className="px-4 sm:px-6 py-3 text-left">Meeting Link</th>
-              <th className="px-4 sm:px-6 py-3 text-left">Response Message</th>
-              <th className="px-4 sm:px-6 py-3 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {queries.length === 0 && !isLoading ? (
-              <tr>
-                <td colSpan="10" className="px-4 sm:px-6 py-4 text-center text-gray-500 text-sm">
-                  No queries found.
-                </td>
-              </tr>
-            ) : (
-              queries.map(query => (
-                <tr key={query._id} className="hover:bg-gray-50">
-                  <td className="px-4 sm:px-6 py-4 text-sm">{query.studentName}</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">{query.title}</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">{query.issue}</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">{query.course}</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">{query.courseTitle || 'N/A'}</td>
-                  <td className="px-4 sm:px-6 py-4">
-                    <span className={`px-2 sm:px-3 py-1 text-xs sm:text-sm ${
-                      query.status === 'Accepted' 
-                        ? 'text-green-800 bg-green-100' 
-                        : 'text-yellow-800 bg-yellow-100'
-                    } rounded-full`}>
-                      {query.status}
-                    </span>
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">{query.mentorName || query.acceptedBy || 'Not Assigned'}</td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">
-                    {query.meetingLink ? (
-                      <a href={query.meetingLink} target="_blank" rel="noopener noreferrer" className="text-green-500 hover:underline">
-                        Open Link
-                      </a>
-                    ) : (
-                      'No Link'
-                    )}
-                  </td>
-                  <td className="px-4 sm:px-6 py-4 text-sm">{query.responseMessage || '-'}</td>
-                  <td className="px-4 sm:px-6 py-4">
-                    <div className="flex flex-col space-y-2">
-                      <button
-                        onClick={() => handleEdit(query)}
-                        className="px-3 sm:px-4 py-2 bg-green-500 text-white font-bold rounded hover:bg-green-600 text-xs sm:text-sm"
-                      >
-                        Update
-                      </button>
-                      <button
-                        onClick={() => handleDelete(query._id)}
-                        className="px-3 sm:px-4 py-2 bg-red-500 text-white font-bold rounded hover:bg-red-600 text-xs sm:text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile Card View */}
-      <div className="block sm:hidden space-y-4">
-        {queries.length === 0 && !isLoading ? (
-          <div className="text-center text-gray-500 py-4 text-sm">
-            No queries found.
+      <div className="flex flex-col md:flex-row pinterest h-[calc(100vh-120px)] mx-4">
+        {/* User List (Sidebar) */}
+        <div className="w-full md:w-1/4 bg-white rounded-lg shadow border border-gray-300 mb-4 md:mb-0 md:mr-4">
+          <div className="p-4 border-b bg-gray-100">
+            <h2 className="text-lg font-medium">Users</h2>
           </div>
-        ) : (
-          queries.map(query => (
-            <div key={query._id} className="bg-white rounded-lg shadow-md p-4">
-              <div className="space-y-2">
-                <div>
-                  <span className="font-medium text-sm">Student Name:</span> {query.studentName}
+          <div className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+            {users.length > 0 ? (
+              users.map((user) => (
+                <div
+                  key={user._id}
+                  onClick={() => handleSelectUser(user)}
+                  className={`p-3 rounded-md cursor-pointer mb-2 flex items-center ${
+                    selectedUser?._id === user._id ? "bg-green-100" : "hover:bg-gray-100"
+                  }`}
+                >
+                  <img
+                    src={user.profilePicture || defaultProfilePic}
+                    alt={`${user.username}'s profile`}
+                    className="w-10 h-10 rounded-full mr-3 object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{user.username}</span>
+                    </div>
+                    <p className="text-sm text-gray-600">{user.email}</p>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-medium text-sm">Title:</span> {query.title}
+              ))
+            ) : (
+              <div className="text-center text-gray-600">No users available</div>
+            )}
+          </div>
+        </div>
+
+        {/* Chat Window */}
+        <div className="w-full md:w-3/4 bg-green-100 rounded-lg shadow border border-gray-300">
+          {selectedUser ? (
+            <>
+              <div className="p-4 border-b bg-gray-100 flex justify-between items-center">
+                <div className="flex items-center">
+                  <img
+                    src={selectedUser.profilePicture || defaultProfilePic}
+                    alt={`${selectedUser.username}'s profile`}
+                    className="w-8 h-8 rounded-full mr-2 object-cover"
+                  />
+                  <h2 className="text-lg font-medium">Chat with {selectedUser.username}</h2>
                 </div>
-                <div>
-                  <span className="font-medium text-sm">Issue:</span> {query.issue}
-                </div>
-                <div>
-                  <span className="font-medium text-sm">Course ID:</span> {query.course}
-                </div>
-                <div>
-                  <span className="font-medium text-sm">Course Title:</span> {query.courseTitle || 'N/A'}
-                </div>
-                <div>
-                  <span className="font-medium text-sm">Status:</span>
-                  <span className={`ml-2 px-2 py-1 text-xs ${
-                    query.status === 'Accepted' 
-                      ? 'text-green-800 bg-green-100' 
-                      : 'text-yellow-800 bg-yellow-100'
-                  } rounded-full`}>
-                    {query.status}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium text-sm">Mentor:</span> {query.mentorName || query.acceptedBy || 'Not Assigned'}
-                </div>
-                <div>
-                  <span className="font-medium text-sm">Meeting Link:</span>{' '}
-                  {query.meetingLink ? (
-                    <a href={query.meetingLink} target="_blank" rel="noopener noreferrer" className="text-green-500 hover:underline text-sm">
-                      Open Link
-                    </a>
-                  ) : (
-                    'No Link'
-                  )}
-                </div>
-                <div>
-                  <span className="font-medium text-sm">Response Message:</span> {query.responseMessage || '-'}
-                </div>
-                <div className="flex flex-wrap gap-2 pt-2">
+                <div className="flex gap-2">
                   <button
-                    onClick={() => handleEdit(query)}
-                    className="flex-1 px-3 py-2 bg-green-500 text-white font-bold rounded hover:bg-green-600 text-sm"
+                    onClick={() => setSelectedUser(null)}
+                    className="text-gray-600 hover:text-gray-800 md:hidden"
                   >
-                    Update
+                    Back
                   </button>
                   <button
-                    onClick={() => handleDelete(query._id)}
-                    className="flex-1 px-3 py-2 bg-red-500 text-white font-bold rounded hover:bg-red-600 text-sm"
+                    onClick={handleCloseChat}
+                    className="text-gray-600 hover:text-gray-800"
+                    title="Close chat"
                   >
-                    Delete
+                    ✕
                   </button>
                 </div>
               </div>
+              <div className="p-4 h-[calc(100vh-280px)] overflow-y-auto">
+                {messages.length > 0 ? (
+                  messages.map((msg) => (
+                    <div
+                      key={msg._id}
+                      className={`mb-4 flex ${
+                        msg.sender._id === Token?.user?._id ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      <div className="flex items-start">
+                        {msg.sender._id !== Token?.user?._id && (
+                          <img
+                            src={msg.sender.profilePicture || defaultProfilePic}
+                            alt={`${msg.sender.username}'s profile`}
+                            className="w-8 h-8 rounded-full mr-2 mt-1 object-cover"
+                          />
+                        )}
+                        <div
+                          className={`max-w-xs md:max-w-md p-3 rounded-lg ${
+                            msg.sender._id === Token?.user?._id
+                              ? "bg-green-600 text-white"
+                              : "bg-gray-200 text-gray-800"
+                          }`}
+                        >
+                          <p>{msg.text}</p>
+                          <p className="text-xs mt-1 opacity-75">
+                            {new Date(msg.createdAt).toLocaleTimeString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center text-gray-600">No messages yet</div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+              <div className="p-4 border-t bg-white">
+                <form onSubmit={handleSendMessage} className="flex">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    className="flex-1 border border-gray-300 rounded-md p-2 mr-2 focus:outline-none focus:ring-2 focus:ring-green-600"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="submit"
+                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:bg-green-400"
+                    disabled={isLoading}
+                  >
+                    Send
+                  </button>
+                </form>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full text-gray-600">
+              Select a user to start chatting
             </div>
-          ))
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
-};
+}
 
-export default AdminQueriesPage;
+export default ChatSystem;

@@ -29,11 +29,11 @@ function AdminLayout() {
       label: "Calendar",
       icon: <Calendar className="h-5" />,
     },
-    {
-      path: "/admin/progress",
-      label: "Progress",
-      icon: <GiProgression className="h-5" />,
-    },
+    // {
+    //   path: "/admin/progress",
+    //   label: "Progress",
+    //   icon: <GiProgression className="h-5" />,
+    // },
     {
       path: "/admin/achievement",
       label: "Achievement",

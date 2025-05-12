@@ -8,26 +8,83 @@ const Token = JSON.parse(localStorage.getItem("loginData"));
 axios.defaults.headers.common["Authorization"] = `Bearer ${Token?.token}`;
 
 // =================================  Authentication section ========================
+// Create Axios instance
+const api = axios.create({
+  baseURL: baseUrl,
+});
+
+// Add request interceptor to dynamically attach token
+api.interceptors.request.use(
+  (config) => {
+    const loginData = JSON.parse(localStorage.getItem("loginData"));
+    const token = loginData?.token;
+    if (token) {
+      config.headers.Authorization = Bearer `${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Helper function to extract error message from response
+const extractErrorMessage = (error) => {
+  if (error.response?.data) {
+    const data = error.response.data;
+    if (data.password) return data.password;
+    if (data.email) return data.email;
+    if (data.username) return data.username;
+    if (data.message) return data.message;
+    return JSON.stringify(data);
+  }
+  return error.message || "An unexpected error occurred.";
+};
+
+// ================================= Authentication Section ========================
 
 // Register
 export const AuthRegister = async (data) => {
   try {
-    const res = await axios.post(`${baseUrl}/api/auth/signup`, data);
+    const res = await api.post("/api/auth/signup", data);
+    localStorage.setItem("loginData", JSON.stringify(res.data));
     return res.data;
   } catch (error) {
-    console.log(error);
+    throw new Error(extractErrorMessage(error));
   }
 };
 
 // Login
 export const AuthLogin = async (data) => {
   try {
-    const res = await axios.post(`${baseUrl}/api/auth/login`, data);
+    const res = await api.post("/api/auth/login", data);
+    localStorage.setItem("loginData", JSON.stringify(res.data));
     return res.data;
   } catch (error) {
-    console.log(error);
+    throw new Error(extractErrorMessage(error));
   }
 };
+
+// Google Login
+export const AuthGoogleLogin = async (idToken) => {
+  try {
+    const res = await api.post("/api/auth/google", { idToken });
+    localStorage.setItem("loginData", JSON.stringify(res.data));
+    return res.data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error));
+  }
+};
+
+// Google Signup
+export const AuthGoogleSignup = async ({ idToken, username }) => {
+  try {
+    const res = await api.post("/api/auth/google", { idToken, username });
+    localStorage.setItem("loginData", JSON.stringify(res.data));
+    return res.data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error));
+  }
+};
+
 
 // logout
 export const Logout = async () => {

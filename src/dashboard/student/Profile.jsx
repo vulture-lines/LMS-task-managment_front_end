@@ -27,7 +27,8 @@ function Profile() {
     loading: true,
     error: null,
     isEditing: false,
-    formData: null
+    formData: null,
+    formErrors: {}
   });
 
   useEffect(() => {
@@ -35,9 +36,6 @@ function Profile() {
       const userInfo = JSON.parse(localStorage.getItem('loginData')) || {};
       const token = userInfo.token;
       const userId = userInfo.user?._id;
-
-      // Log token and userId for debugging
-      console.log('Fetching user data with:', { token, userId });
 
       if (!token || !userId) {
         setState((prev) => ({
@@ -57,16 +55,10 @@ function Profile() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          console.error('API error response:', errorData); // Log error details
-          if (response.status === 403) {
+          if (response.status === 403 || response.status === 404) {
             localStorage.removeItem('loginData');
             window.location.href = '/login';
-            throw new Error('Access forbidden. Your session may have expired. Redirecting to login.');
-          }
-          if (response.status === 404) {
-            localStorage.removeItem('loginData');
-            window.location.href = '/login';
-            throw new Error('User profile not found. Redirecting to login.');
+            throw new Error('Session expired or profile not found. Redirecting to login.');
           }
           throw new Error(errorData.message || `Failed to fetch profile data (Status: ${response.status})`);
         }
@@ -96,7 +88,6 @@ function Profile() {
           loading: false
         }));
       } catch (err) {
-        console.error('Fetch error:', err.message); // Log fetch errors
         setState((prev) => ({
           ...prev,
           loading: false,
@@ -116,11 +107,73 @@ function Profile() {
     return date.toLocaleDateString('en-US', options);
   };
 
+  const validateField = (name, value) => {
+    switch (name) {
+      case 'username':
+        if (!/^[a-zA-Z0-9_]*$/.test(value)) {
+          return 'Username can only contain letters, numbers, and underscores';
+        }
+        return value ? '' : 'Username is required';
+      case 'firstName':
+        if (!value) {
+          return 'First Name is required';
+        }
+        if (!/^[a-zA-Z\s]*$/.test(value)) {
+          return 'Only letters and spaces are allowed (no numbers or special characters)';
+        }
+        return '';
+      case 'lastName':
+        if (!value) {
+          return 'Last Name is required';
+        }
+        if (!/^[a-zA-Z\s]*$/.test(value)) {
+          return 'Only letters and spaces are allowed (no numbers or special characters)';
+        }
+        return '';
+      case 'email':
+        if (!value) {
+          return 'Email is required';
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          return 'Please enter a valid email address';
+        }
+        return '';
+      case 'gender':
+        return value ? '' : 'Gender is required';
+      case 'phone':
+        if (!value) {
+          return 'Phone number is required';
+        }
+        if (!/^[6789]\d{9}$/.test(value)) {
+          return 'Mobile number must be 10 digits and start with 6, 7, 8, or 9';
+        }
+        return '';
+      case 'dob':
+        if (!value) {
+          return 'Date of birth is not mandatory but recommended';
+        }
+        const selectedDate = new Date(value);
+        const today = new Date();
+        if (selectedDate > today) {
+          return 'Future dates are not allowed';
+        }
+        return '';
+      case 'education':
+        if (!/^\d*$/.test(value)) {
+          return 'Only numbers are allowed (e.g., years of education)';
+        }
+        return '';
+      default:
+        return '';
+    }
+  };
+
   const handleEditClick = () => {
     setState((prev) => ({
       ...prev,
       isEditing: true,
-      formData: { ...prev.profile }
+      formData: { ...prev.profile },
+      formErrors: {}
     }));
   };
 
@@ -128,17 +181,23 @@ function Profile() {
     setState((prev) => ({
       ...prev,
       isEditing: false,
-      formData: null
+      formData: null,
+      formErrors: {}
     }));
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    const error = validateField(name, value);
     setState((prev) => ({
       ...prev,
       formData: {
         ...prev.formData,
         [name]: value
+      },
+      formErrors: {
+        ...prev.formErrors,
+        [name]: error
       }
     }));
   };
@@ -158,15 +217,36 @@ function Profile() {
       return;
     }
 
-    const requiredFields = ['username', 'email'];
-    for (const field of requiredFields) {
-      if (!state.formData[field]) {
-        setState((prev) => ({
-          ...prev,
-          error: `Please fill in the ${field} field`
-        }));
-        return;
+    const requiredFields = ['username', 'firstName', 'lastName', 'email', 'gender', 'phone'];
+    const newErrors = {};
+    let hasErrors = false;
+
+    // Validate required fields
+    requiredFields.forEach((field) => {
+      const error = validateField(field, state.formData[field]);
+      if (error) {
+        newErrors[field] = error;
+        hasErrors = true;
       }
+    });
+
+    // Validate non-required fields
+    ['dob', 'education'].forEach((field) => {
+      const error = validateField(field, state.formData[field]);
+      if (error && field !== 'dob') {
+        newErrors[field] = error;
+        hasErrors = true;
+      } else if (error) {
+        newErrors[field] = error; // Non-blocking for dob
+      }
+    });
+
+    if (hasErrors) {
+      setState((prev) => ({
+        ...prev,
+        formErrors: newErrors
+      }));
+      return;
     }
 
     try {
@@ -198,6 +278,7 @@ function Profile() {
         },
         isEditing: false,
         formData: null,
+        formErrors: {},
         error: null
       }));
     } catch (err) {
@@ -208,7 +289,7 @@ function Profile() {
     }
   };
 
-  const { profile, loading, error, isEditing, formData } = state;
+  const { profile, loading, error, isEditing, formData, formErrors } = state;
 
   if (loading) {
     return (
@@ -224,7 +305,6 @@ function Profile() {
         <div className="bg-red-50 border-l-4 border-red-500 p-4" role="alert">
           <div className="flex">
             <div className="flex-shrink-0">
-              {/* Ensure valid viewBox; fallback to "0 0 20 20" if needed */}
               <svg
                 className="h-5 w-5 text-red-500"
                 xmlns="http://www.w3.org/2000/svg"
@@ -263,10 +343,10 @@ function Profile() {
         <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
           <div
             className="w-24 h-24 rounded-full border-4 border-white bg-white shadow-lg flex items-center justify-center"
-            aria-label={`Profile picture for ${profile.firstName} ${profile.lastName}`}
+            aria-label={`Profile picture for ${profile.firstName}`}
           >
             <span className="text-3xl font-bold text-blue-600">
-              {profile.firstName.charAt(0)}{profile.lastName.charAt(0)}
+              {profile.firstName ? profile.firstName.charAt(0).toUpperCase() : 'U'}
             </span>
           </div>
         </div>
@@ -293,70 +373,97 @@ function Profile() {
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Username</label>
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                  required
-                />
+                <label htmlFor="username" className="text-sm font-medium text-gray-500">Username <span className="text-red-500">*</span></label>
+                <div className="col-span-2">
+                  <input
+                    id="username"
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    className="w-full text-sm text-gray-900 border rounded-md p-2"
+                    required
+                  />
+                  {formErrors.username && <p className="text-sm text-red-500 mt-1">{formErrors.username}</p>}
+                </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">First Name</label>
-                <input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                />
+                <label htmlFor="firstName" className="text-sm font-medium text-gray-500">First Name <span className="text-red-500">*</span></label>
+                <div className="col-span-2">
+                  <input
+                    id="firstName"
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="w-full text-sm text-gray-900 border rounded-md p-2"
+                    required
+                  />
+                  {formErrors.firstName && <p className="text-sm text-red-500 mt-1">{formErrors.firstName}</p>}
+                </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Last Name</label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                />
+                <label htmlFor="lastName" className="text-sm font-medium text-gray-500">Last Name <span className="text-red-500">*</span></label>
+                <div className="col-span-2">
+                  <input
+                    id="lastName"
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="w-full text-sm text-gray-900 border rounded-md p-2"
+                    required
+                  />
+                  {formErrors.lastName && <p className="text-sm text-red-500 mt-1">{formErrors.lastName}</p>}
+                </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                  required
-                />
+                <label htmlFor="email" className="text-sm font-medium text-gray-500">Email <span className="text-red-500">*</span></label>
+                <div className="col-span-2">
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full text-sm text-gray-900 border rounded-md p-2"
+                    required
+                  />
+                  {formErrors.email && <p className="text-sm text-red-500 mt-1">{formErrors.email}</p>}
+                </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Date of Birth</label>
-                <input
-                  type="date"
-                  name="dob"
-                  value={formData.dob ? new Date(formData.dob).toISOString().split('T')[0] : ''}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                />
+                <label htmlFor="dob" className="text-sm font-medium text-gray-500">Date of Birth</label>
+                <div className="col-span-2">
+                  <input
+                    id="dob"
+                    type="date"
+                    name="dob"
+                    value={formData.dob ? new Date(formData.dob).toISOString().split('T')[0] : ''}
+                    onChange={handleInputChange}
+                    className="w-full text-sm text-gray-900 border rounded-md p-2"
+                  />
+                  {formErrors.dob && <p className="text-sm text-yellow-500 mt-1">{formErrors.dob}</p>}
+                </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Gender</label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
+                <label htmlFor="gender" className="text-sm font-medium text-gray-500">Gender <span className="text-red-500">*</span></label>
+                <div className="col-span-2">
+                  <select
+                    id="gender"
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleInputChange}
+                    className="w-full text-sm text-gray-900 border rounded-md p-2"
+                    required
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  {formErrors.gender && <p className="text-sm text-red-500 mt-1">{formErrors.gender}</p>}
+                </div>
               </div>
             </div>
           </div>
@@ -367,81 +474,49 @@ function Profile() {
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Phone</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                   pattern="^[6789]\d{9}$"
-                />
+                <label htmlFor="phone" className="text-sm font-medium text-gray-500">Phone <span className="text-red-500">*</span></label>
+                <div className="col-span-2">
+                  <input
+                    id="phone"
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full text-sm text-gray-900 border rounded-md p-2"
+                    required
+                    pattern="[6789][0-9]{9}"
+                  />
+                  {formErrors.phone && <p className="text-sm text-red-500 mt-1">{formErrors.phone}</p>}
+                </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Address</label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                />
+                <label htmlFor="address" className="text-sm font-medium text-gray-500">Address</label>
+                <div className="col-span-2">
+                  <input
+                    id="address"
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className="w-full text-sm text-gray-900 border rounded-md p-2"
+                  />
+                  {formErrors.address && <p className="text-sm text-red-500 mt-1">{formErrors.address}</p>}
+                </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Education</label>
-                <input
-                  type="text"
-                  name="education"
-                  value={formData.education}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                />
+                <label htmlFor="education" className="text-sm font-medium text-gray-500">Education (Years)</label>
+                <div className="col-span-2">
+                  <input
+                    id="education"
+                    type="text"
+                    name="education"
+                    value={formData.education}
+                    onChange={handleInputChange}
+                    className="w-full text-sm text-gray-900 border rounded-md p-2"
+                  />
+                  {formErrors.education && <p className="text-sm text-red-500 mt-1">{formErrors.education}</p>}
+                </div>
               </div>
-              {/* <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Qualification</label>
-                <input
-                  type="text"
-                  name="qualification"
-                  value={formData.qualification}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Marital Status</label>
-                <select
-                  name="maritalStatus"
-                  value={formData.maritalStatus}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                >
-                  <option value="">Select Marital Status</option>
-                  <option value="Single">Single</option>
-                  <option value="Married">Married</option>
-                  <option value="Divorced">Divorced</option>
-                  <option value="Widowed">Widowed</option>
-                </select>
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Ministry</label>
-                <input
-                  type="text"
-                  name="ministry"
-                  value={formData.ministry}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <label className="text-sm font-medium text-gray-500">Theological</label>
-                <input
-                  type="text"
-                  name="theological"
-                  value={formData.theological}
-                  onChange={handleInputChange}
-                  className="col-span-2 text-sm text-gray-900 border rounded-md p-2"
-                />
-              </div> */}
             </div>
           </div>
 
@@ -462,7 +537,7 @@ function Profile() {
           </div>
 
           {error && (
-            <div className="col-span-1 md:col-span-2 bg-red-50 border-l-4 border-red-500 p-4" role="alert">
+            <div className="col-span-1 md:col-span-2 bg-red-50 border-l-4 border-red-500 p-4" role="alert" aria-live="polite">
               <div className="flex">
                 <div className="flex-shrink-0">
                   <svg
@@ -537,25 +612,9 @@ function Profile() {
                   <p className="col-span-2 text-sm text-gray-900">{profile.address || 'Not provided'}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Education</p>
+                  <p className="text-sm font-medium text-gray-500">Education (Years)</p>
                   <p className="col-span-2 text-sm text-gray-900">{profile.education || 'Not provided'}</p>
                 </div>
-                {/* <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Qualification</p>
-                  <p className="col-span-2 text-sm text-gray-900">{profile.qualification || 'Not provided'}</p>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Marital Status</p>
-                  <p className="col-span-2 text-sm text-gray-900">{profile.maritalStatus || 'Not provided'}</p>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Ministry</p>
-                  <p className="col-span-2 text-sm text-gray-900">{profile.ministry || 'Not provided'}</p>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Theological</p>
-                  <p className="col-span-2 text-sm text-gray-900">{profile.theological || 'Not provided'}</p>
-                </div> */}
               </div>
             </div>
           </div>
