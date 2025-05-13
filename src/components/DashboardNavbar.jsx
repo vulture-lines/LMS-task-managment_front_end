@@ -41,7 +41,11 @@ function DashboardNavbar() {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const goToProfile = () => {
-    navigate('/student/Profile');
+    // Check user role from userInfo; default to 'Student' if role is not defined
+    const role = userInfo?.user?.role || 'Student';
+    const profilePath = role === 'Mentor' ? '/admin/adminProfile' : '/student/profile';
+    console.log('Navigating to:', profilePath, 'with role:', role); // Debug log
+    navigate(profilePath);
   };
 
   const toggleDropdown = () => {

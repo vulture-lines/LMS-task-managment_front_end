@@ -497,14 +497,14 @@ const ForumPostCard = ({ post, currentUser, onUpdate, onDelete, onRefresh }) => 
               <ChevronDown className="h-4 w-4" />
             )}
           </button>
-          <button
+          {/* <button
             onClick={handleShare}
             className="flex items-center gap-1 text-gray-600 hover:text-gray-800"
             aria-label={copied ? "Link copied" : "Share post"}
           >
             <Share2 className="h-4 w-4" />
             <span>{copied ? "Copied!" : "Share"}</span>
-          </button>
+          </button> */}
           {canEditOrDelete && (
             <>
               <button

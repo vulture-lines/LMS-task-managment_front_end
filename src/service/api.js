@@ -84,6 +84,28 @@ export const AuthGoogleSignup = async ({ code, username }) => {
   }
 };
 
+// forgot password
+export const AuthForgotPassword = async (data) => {
+  try {
+    const res = await api.post("/api/auth/forgot-password", data);
+    return res.data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error));
+  }
+};
+
+
+// Reset Password
+export const AuthResetPassword = async ({ token, newPassword }) => {
+  try {
+    const res = await api.post(`/api/auth/reset-password/${token}`, { newPassword });
+    return res.data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error));
+  }
+};
+
+
 // logout
 export const Logout = async () => {
   try {
@@ -135,6 +157,14 @@ export const UpdateUserById = async (userId, userData) => {
 
 // Update user approval status
 export const UpdateUserApproval = async (userId, isApproved) => {
+  try {
+    const res = await axios.put(`${baseUrl}/api/users/approve/${userId}`, { isApproved });
+    return res.data;
+  } catch (error) {
+    throw error.response?.data?.message || error.message || "Failed to update approval status";
+  }
+};
+export const UpdateUserApproval1 = async (userId, isApproved) => {
   try {
     const res = await axios.put(`${baseUrl}/api/users/approve/${userId}`, { isApproved });
     return res.data;
@@ -474,7 +504,15 @@ export const UpdateAnnouncement = async (id, updateData) => {
     throw error.response?.data?.message || error.message || "Failed to update announcement";
   }
 };
-
+// Delete announcement by ID
+export const DeleteAnnouncement = async (id) => {
+  try {
+    const res = await axios.delete(`${baseUrl}/api/announcements/${id}`);
+    return res.data;
+  } catch (error) {
+    throw error.response?.data?.message || error.message || "Failed to delete announcement";
+  }
+};
 // ================================= Announcement section ========================
 //
 //

@@ -459,18 +459,24 @@ const Login = () => {
                   >
                     <input
                       type="text"
-                      placeholder="Your username"
+                      placeholder="Username or Email"
                       className={`w-full border ${
                         loginErrors.identifier
                           ? "border-red-500"
                           : "border-gray-300"
                       } rounded-md p-3 mb-2`}
                       {...loginRegister("identifier", {
-                        required: "Username is required",
-                        pattern: {
-                          value: /^[A-Za-z0-9\s]+$/,
-                          message:
-                            "Username should not contain special characters",
+                        required: "Username or Email is required",
+                        validate: (value) => {
+                          const usernameRegex = /^[A-Za-z0-9\s]+$/;
+                          const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                          if (!usernameRegex.test(value) && !emailRegex.test(value)) {
+                            return "Please enter a valid username (alphanumeric, 3-20 characters) or email";
+                          }
+                          if (usernameRegex.test(value) && (value.length < 3 || value.length > 20)) {
+                            return "Username must be between 3 and 20 characters";
+                          }
+                          return true;
                         },
                       })}
                     />
@@ -519,7 +525,7 @@ const Login = () => {
                     )}
 
                     <div className="text-right text-sm mb-6">
-                      <a href="#" className="text-blue-500 hover:underline">
+                      <a href="/forgotpassword" className="text-blue-500 hover:underline">
                         Forgot password?
                       </a>
                     </div>

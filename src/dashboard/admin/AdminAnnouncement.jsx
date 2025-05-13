@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { CreateAnnouncement, GetAllAnnouncements, UpdateAnnouncement } from '../../service/api';
-import axios from 'axios';
-
-// Define DeleteAnnouncement function
-const DeleteAnnouncement = async (id) => {
-  try {
-    const res = await axios.delete(`${baseUrl}/api/announcements/${id}`);
-    return res.data;
-  } catch (error) {
-    throw error.response?.data?.message || error.message || "Failed to delete announcement";
-  }
-};
+import { CreateAnnouncement, GetAllAnnouncements, UpdateAnnouncement, DeleteAnnouncement } from '../../service/api';
 
 const AdminAnnouncement = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -100,6 +89,7 @@ const AdminAnnouncement = () => {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this announcement?")) return;
     setIsLoading(true);
     setError(null);
     try {
@@ -107,7 +97,8 @@ const AdminAnnouncement = () => {
       // Refresh announcements
       await refreshAnnouncements();
     } catch (err) {
-      setError(err.message || "Failed to delete announcement");
+      console.error("Delete announcement error:", err);
+      setError(err.message || "Failed to delete announcement. Please try again.");
     } finally {
       setIsLoading(false);
     }

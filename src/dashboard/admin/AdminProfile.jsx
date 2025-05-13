@@ -3,7 +3,7 @@ import { baseUrl1 } from '../../service/api';
 
 const API_URL = baseUrl1;
 
-function Profile() {
+function AdminProfile() {
   const [state, setState] = useState({
     profile: {
       username: '',
@@ -624,4 +624,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default AdminProfile;

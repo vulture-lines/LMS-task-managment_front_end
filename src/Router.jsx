@@ -4,6 +4,9 @@ import Navbar from "./components/Navbar";
 import Home from "./Home/Home";
 // Authentication
 import Login from "./authentication/Login";
+import ForgotPassword from "./authentication/FogotPassword";
+import ResetPassword from "./authentication/ResetPassword";
+
 // Admin
 import AdminLayout from "./dashboard/admin/AdminLayout";
 import AdminDashboard from "./dashboard/admin/AdminDashboard";
@@ -19,6 +22,7 @@ import AdminProgress from "./dashboard/admin/AdminProgress";
 import AdminQuery from "./dashboard/admin/AdminQuery";``
 import AdminForumPage from "./dashboard/admin/AdminForumPage";
 import AdminTask from "./dashboard/admin/AdminTask";
+import AdminProfile from "./dashboard/admin/AdminProfile"
 
 // Student
 import StudentLayout from "./dashboard/student/StudentLayout";
@@ -55,6 +59,15 @@ export const Router = createBrowserRouter([
   {
     path: "login",
     element: <Login />,
+  },
+  {
+    path:"forgotpassword",
+    element:<ForgotPassword/>,
+  
+  },
+  {
+    path:"reset-password/:token",
+    element:<ResetPassword/>
   },
   {
     path: "admin",
@@ -118,6 +131,10 @@ export const Router = createBrowserRouter([
       {
         path: "task",
         element: <AdminTask />,
+      },
+      {
+        path: "adminProfile",
+        element: <AdminProfile />,
       },
     ],
   },
