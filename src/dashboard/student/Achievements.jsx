@@ -80,7 +80,7 @@ function Achievements() {
   return (
     <>
       <PageHeader title="Task Achievements" />
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 font-poppins" >
         {/* Loading state */}
         {isLoading && (
           <div className="text-center text-gray-500">Loading...</div>
@@ -111,17 +111,17 @@ function Achievements() {
                       <span className="text-2xl">{getBadgeEmoji(achievement.badge)}</span>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-800">{achievement.title}</h3>
+                      <h3 className="text-lg font-semibold text-gray-800 font-poppins">{achievement.title}</h3>
                       <p className="text-gray-500 text-sm mt-1">
                         {achievement.description || `Completed ${achievement.title}`}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-yellow-200">
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-yellow-200 font-poppins">
                     <div className="text-sm text-gray-500">
                       🏆 Earned on {formatDate(achievement.createdAt)}
                     </div>
-                    <div className="bg-blue-100 px-3 py-1 rounded-full text-blue-600 text-xs font-medium">
+                    <div className="bg-blue-100 px-3 py-1 rounded-full text-blue-600 text-xs font-medium font-poppins">
                       {getCategory(achievement.title)}
                     </div>
                   </div>

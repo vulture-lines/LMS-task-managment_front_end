@@ -555,7 +555,7 @@ function UserManagement() {
                 ) : (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-3 items-center">
-                      <label className="font-medium text-gray-700">
+                      <label className="font-medium font-poppins text-gray-700">
                         First Name: <span className="text-red-500">*</span>
                       </label>
                       <div className="md:col-span-2">
@@ -574,7 +574,7 @@ function UserManagement() {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 items-center">
-                      <label className="font-medium text-gray-700">
+                      <label className="font-medium font-poppins text-gray-700">
                         Last Name: <span className="text-red-500">*</span>
                       </label>
                       <div className="md:col-span-2">
@@ -593,7 +593,7 @@ function UserManagement() {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 items-center">
-                      <label className="font-medium text-gray-700">
+                      <label className="font-medium font-poppins text-gray-700">
                         Username: <span className="text-red-500">*</span>
                       </label>
                       <div className="md:col-span-2">
@@ -612,7 +612,7 @@ function UserManagement() {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 items-center">
-                      <label className="font-medium text-gray-700">
+                      <label className="font-medium font-poppins text-gray-700">
                         Email: <span className="text-red-500">*</span>
                       </label>
                       <div className="md:col-span-2">
@@ -631,7 +631,7 @@ function UserManagement() {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 items-center">
-                      <label className="font-medium text-gray-700">
+                      <label className="font-medium font-poppins text-gray-700">
                         Date of Birth: <span className="text-red-500">*</span>
                       </label>
                       <div className="md:col-span-2">
@@ -650,7 +650,7 @@ function UserManagement() {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 items-center">
-                      <label className="font-medium text-gray-700">
+                      <label className="font-medium font-poppins text-gray-700">
                         Gender: <span className="text-red-500">*</span>
                       </label>
                       <div className="md:col-span-2">
@@ -673,7 +673,7 @@ function UserManagement() {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 items-center">
-                      <label className="font-medium text-gray-700">Role:</label>
+                      <label className="font-medium font-poppins text-gray-700">Role:</label>
                       <div className="md:col-span-2">
                         <select
                           name="role"
@@ -689,7 +689,7 @@ function UserManagement() {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 items-center">
-                      <label className="font-medium text-gray-700">
+                      <label className="font-medium font-poppins text-gray-700">
                         Educational Qualification: <span className="text-red-500">*</span>
                       </label>
                       <div className="md:col-span-2">
@@ -727,7 +727,7 @@ function UserManagement() {
                       </div>
                     </div> */}
                     <div className="grid grid-cols-1 md:grid-cols-3 items-center">
-                      <label className="font-medium text-gray-700">
+                      <label className="font-medium font-poppins text-gray-700">
                         Phone No: <span className="text-red-500">*</span>
                       </label>
                       <div className="md:col-span-2">
@@ -747,7 +747,7 @@ function UserManagement() {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 items-center">
-                      <label className="font-medium text-gray-700">
+                      <label className="font-medium font-poppins text-gray-700">
                         Present Address: <span className="text-red-500">*</span>
                       </label>
                       <div className="md:col-span-2">
@@ -824,19 +824,19 @@ function UserManagement() {
                   </div>
                   <div className="p-4 space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="font-medium">Email:</span>
+                      <span className="font-medium" font-poppins>Email:</span>
                       <span className="text-gray-700">{user.email}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="font-medium">Date of Birth:</span>
+                      <span className="font-medium" font-poppins>Date of Birth:</span>
                       <span className="text-gray-700">{user.dob ? new Date(user.dob).toLocaleDateString() : ''}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="font-medium">Gender:</span>
+                      <span className="font-medium" font-poppins>Gender:</span>
                       <span className="text-gray-700">{user.gender}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="font-medium">Approved:</span>
+                      <span className="font-medium"font-poppins>Approved:</span>
                       <ToggleSwitch
                         isApproved={user.isApproved}
                         userId={user._id}
@@ -858,13 +858,13 @@ function UserManagement() {
               <table className="min-w-full divide-y divide-gray-200 border border-gray-300 bg-white text-sm">
                 <thead className="sticky top-0 bg-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium text-gray-900 min-w-[60px]">S.No</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-900 min-w-[150px]">Username</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-900 min-w-[200px]">Email</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-900 min-w-[120px]">Date of Birth</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-900 min-w-[100px]">Gender</th>
-                    <th className="px-4 py-3 text-center font-medium text-gray-900 min-w-[100px]">Approved</th>
-                    <th className="px-4 py-3 text-center font-medium text-gray-900 min-w-[100px]">Actions</th>
+                    <th className="px-4 py-3 text-left font-medium font-poppins text-gray-900 min-w-[60px]">S.No</th>
+                    <th className="px-4 py-3 text-left font-medium font-poppins text-gray-900 min-w-[150px]">Username</th>
+                    <th className="px-4 py-3 text-left font-medium font-poppins text-gray-900 min-w-[200px]">Email</th>
+                    <th className="px-4 py-3 text-left font-medium font-poppins text-gray-900 min-w-[120px]">Date of Birth</th>
+                    <th className="px-4 py-3 text-left font-medium font-poppins text-gray-900 min-w-[100px]">Gender</th>
+                    <th className="px-4 py-3 text-center font-medium font-poppins text-gray-900 min-w-[100px]">Approved</th>
+                    <th className="px-4 py-3 text-center font-medium font-poppins text-gray-900 min-w-[100px]">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">

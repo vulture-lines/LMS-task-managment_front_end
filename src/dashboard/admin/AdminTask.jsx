@@ -234,7 +234,7 @@ const AdminTask = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value, checked } = e.target;
+    const { name, value, checkboxes } = e.target;
     if (name === 'selectedUser') {
       setTaskData((prev) => ({
         ...prev,
@@ -739,6 +739,7 @@ const AdminTask = () => {
                         onChange={() => setSelectedUserType('admin')}
                         className="mr-2 focus:ring-purple-500"
                       />
+                      interrupts
                       <label htmlFor="userTypeAdmin" className="text-gray-700 font-poppins">
                         Admin
                       </label>
@@ -1241,132 +1242,6 @@ const AdminTask = () => {
                             >
                               Edit Task
                             </button>
-                            {reviewingTask && reviewingTask.taskId === task._id && (
-                              <div className="mt-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
-                                <h5 className="text-lg font-semibold text-gray-900 mb-4 font-jakarta">Review Submission</h5>
-                                {task.submissions.map(
-                                  (submission) =>
-                                    reviewingTask.userId === submission.user && (
-                                      <div key={submission.user} className="space-y-4">
-                                        <div>
-                                          <p className="text-sm font-medium text-gray-600 font-poppins">Submitted Files</p>
-                                          {(submission.file || submission.driveLink) ? (
-                                            <div className="text-sm text-gray-600 font-poppins">
-                                              {submission.file && (
-                                                <a
-                                                  href={submission.file}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-purple-600 hover:underline mr-2 font-poppins"
-                                                >
-                                                  View Submitted File
-                                                </a>
-                                              )}
-                                              {submission.driveLink && (
-                                                <a
-                                                  href={submission.driveLink}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-purple-600 hover:underline font-poppins"
-                                                >
-                                                  View Drive Link
-                                                </a>
-                                              )}
-                                            </div>
-                                          ) : (
-                                            <p className="text-gray-500 text-sm font-poppins">No files submitted</p>
-                                          )}
-                                        </div>
-                                        <div>
-                                          <label
-                                            className="block text-sm font-medium text-gray-600 mb-1 font-poppins"
-                                            htmlFor={`reviewNote_${task._id}_${submission.user}`}
-                                          >
-                                            Feedback
-                                          </label>
-                                          <textarea
-                                            id={`reviewNote_${task._id}_${submission.user}`}
-                                            name={`reviewNote_${task._id}_${submission.user}`}
-                                            value={
-                                              reviewData[`${task._id}_${submission.user}`]?.reviewNote ||
-                                              submission.reviewNote || ''
-                                            }
-                                            onChange={(e) =>
-                                              handleReviewChange(task._id, submission.user, 'reviewNote', e.target.value)
-                                            }
-                                            className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-poppins"
-                                            rows="4"
-                                            placeholder="Enter feedback"
-                                          />
-                                        </div>
-                                        <div>
-                                          <label
-                                            className="block text-sm font-medium text-gray-600 mb-1 font-poppins"
-                                            htmlFor={`status_${task._id}_${submission.user}`}
-                                          >
-                                            Status
-                                          </label>
-                                          <select
-                                            id={`status_${task._id}_${submission.user}`}
-                                            name={`status_${task._id}_${submission.user}`}
-                                            value={
-                                              reviewData[`${task._id}_${submission.user}`]?.status ||
-                                              submission.status.toLowerCase() || ''
-                                            }
-                                            onChange={(e) =>
-                                              handleReviewChange(task._id, submission.user, 'status', e.target.value)
-                                            }
-                                            className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-poppins"
-                                          >
-                                            <option value="">Select status</option>
-                                            <option value="approved">Approved</option>
-                                            <option value="resubmit">Resubmit</option>
-                                          </select>
-                                        </div>
-                                        <div>
-                                          <label
-                                            className="block text-sm font-medium text-gray-600 mb-1 font-poppins"
-                                            htmlFor={`markGiven_${task._id}_${submission.user}`}
-                                          >
-                                            Marks Given
-                                          </label>
-                                          <input
-                                            type="number"
-                                            id={`markGiven_${task._id}_${submission.user}`}
-                                            name={`markGiven_${task._id}_${submission.user}`}
-                                            value={
-                                              reviewData[`${task._id}_${submission.user}`]?.markGiven !== undefined
-                                                ? reviewData[`${task._id}_${submission.user}`].markGiven
-                                                : submission.markGiven || 0
-                                            }
-                                            onChange={(e) =>
-                                              handleReviewChange(task._id, submission.user, 'markGiven', e.target.value)
-                                            }
-                                            className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-poppins"
-                                            placeholder="Enter marks"
-                                            min="0"
-                                            max={task.maxMarks || 100}
-                                          />
-                                        </div>
-                                        <div className="flex space-x-3">
-                                          <button
-                                            onClick={() => handleReviewSubmit(task._id, submission.user)}
-                                            className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition font-poppins"
-                                          >
-                                            Submit Review
-                                          </button>
-                                          <button
-                                            onClick={() => setReviewingTask(null)}
-                                            className="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition font-poppins"
-                                          >
-                                            Cancel
-                                          </button>
-                                        </div>
-                                      </div>
-                                    )
-                                )}
-                              </div>
-                            )}
                           </>
                         )}
                       </div>
@@ -1375,6 +1250,138 @@ const AdminTask = () => {
                 )}
               </div>
             ))}
+          </div>
+        )}
+        {reviewingTask && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full">
+              <h5 className="text-lg font-semibold text-gray-900 mb-4 font-jakarta">Review Submission</h5>
+              {assignedTasks
+                .find((task) => task._id === reviewingTask.taskId)
+                ?.submissions.map(
+                  (submission) =>
+                    reviewingTask.userId === submission.user && (
+                      <div key={submission.user} className="space-y-4">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600 font-poppins">Submitted Files</p>
+                          {(submission.file || submission.driveLink) ? (
+                            <div className="text-sm text-gray-600 font-poppins">
+                              {submission.file && (
+                                <a
+                                  href={submission.file}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-purple-600 hover:underline mr-2 font-poppins"
+                                >
+                                  View Submitted File
+                                </a>
+                              )}
+                              {submission.driveLink && (
+                                <a
+                                  href={submission.driveLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-purple-600 hover:underline font-poppins"
+                                >
+                                  View Drive Link
+                                </a>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-gray-500 text-sm font-poppins">No files submitted</p>
+                          )}
+                        </div>
+                        <div>
+                          <label
+                            className="block text-sm font-medium text-gray-600 mb-1 font-poppins"
+                            htmlFor={`reviewNote_${reviewingTask.taskId}_${submission.user}`}
+                          >
+                            Feedback
+                          </label>
+                          <textarea
+                            id={`reviewNote_${reviewingTask.taskId}_${submission.user}`}
+                            name={`reviewNote_${reviewingTask.taskId}_${submission.user}`}
+                            value={
+                              reviewData[`${reviewingTask.taskId}_${submission.user}`]?.reviewNote ||
+                              submission.reviewNote || ''
+                            }
+                            onChange={(e) =>
+                              handleReviewChange(reviewingTask.taskId, submission.user, 'reviewNote', e.target.value)
+                            }
+                            className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-poppins"
+                            rows="4"
+                            placeholder="Enter feedback"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            className="block text-sm font-medium text-gray-600 mb-1 font-poppins"
+                            htmlFor={`status_${reviewingTask.taskId}_${submission.user}`}
+                          >
+                            Status
+                          </label>
+                          <select
+                            id={`status_${reviewingTask.taskId}_${submission.user}`}
+                            name={`status_${reviewingTask.taskId}_${submission.user}`}
+                            value={
+                              reviewData[`${reviewingTask.taskId}_${submission.user}`]?.status ||
+                              submission.status.toLowerCase() || ''
+                            }
+                            onChange={(e) =>
+                              handleReviewChange(reviewingTask.taskId, submission.user, 'status', e.target.value)
+                            }
+                            className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-poppins"
+                          >
+                            <option value="">Select status</option>
+                            <option value="approved">Approved</option>
+                            <option value="resubmit">Resubmit</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label
+                            className="block text-sm font-medium text-gray-600 mb-1 font-poppins"
+                            htmlFor={`markGiven_${reviewingTask.taskId}_${submission.user}`}
+                          >
+                            Marks Given
+                          </label>
+                          <input
+                            type="number"
+                            id={`markGiven_${reviewingTask.taskId}_${submission.user}`}
+                            name={`markGiven_${reviewingTask.taskId}_${submission.user}`}
+                            value={
+                              reviewData[`${reviewingTask.taskId}_${submission.user}`]?.markGiven !== undefined
+                                ? reviewData[`${reviewingTask.taskId}_${submission.user}`].markGiven
+                                : submission.markGiven || 0
+                            }
+                            onChange={(e) =>
+                              handleReviewChange(reviewingTask.taskId, submission.user, 'markGiven', e.target.value)
+                            }
+                            className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-poppins"
+                            placeholder="Enter marks"
+                            min="0"
+                            max={
+                              assignedTasks.find((task) => task._id === reviewingTask.taskId)?.maxMarks || 100
+                            }
+                          />
+                        </div>
+                        <div className="flex space-x-3">
+                          <button
+                            onClick={() => handleReviewSubmit(reviewingTask.taskId, submission.user)}
+                            className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition font-poppins"
+                          >
+                            Submit Review
+                          </button>
+                          <button
+                            onClick={() => setReviewingTask(null)}
+                            className="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition font-poppins"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )
+                )}
+            </div>
           </div>
         )}
       </main>

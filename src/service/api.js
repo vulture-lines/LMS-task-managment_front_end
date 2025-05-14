@@ -30,14 +30,30 @@ api.interceptors.request.use(
 const extractErrorMessage = (error) => {
   if (error.response?.data) {
     const data = error.response.data;
-    if (data.password) return data.password;
-    if (data.email) return data.email;
-    if (data.username) return data.username;
-    if (data.message) return data.message;
-    return JSON.stringify(data);
+    // Check for specific error fields and return the first available message
+    if (data.error) return Array.isArray(data.error) ? data.error[0] : data.error;
+    if (data.password) return Array.isArray(data.password) ? data.password[0] : data.password;
+    if (data.email) return Array.isArray(data.email) ? data.email[0] : data.email;
+    if (data.username) return Array.isArray(data.username) ? data.username[0] : data.username;
+    if (data.message) return Array.isArray(data.message) ? data.message[0] : data.message;
+    // Fallback: return a generic message if no specific fields are found
+    return "An unexpected error occurred. Please try again.";
   }
   return error.message || "An unexpected error occurred.";
 };
+
+// Helper function to extract error message from response
+// const extractErrorMessage = (error) => {
+//   if (error.response?.data) {
+//     const data = error.response.data;
+//     if (data.password) return data.password;
+//     if (data.email) return data.email;
+//     if (data.username) return data.username;
+//     if (data.message) return data.message;
+//     return JSON.stringify(data);
+//   }
+//   return error.message || "An unexpected error occurred.";
+// };
 
 // ================================= Authentication Section ========================
 
