@@ -310,7 +310,7 @@ function BigCalendar() {
                   </label>
                   <input
                     type="datetime-local"
-                    className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 font-poppins"
                     value={newEvent.start}
                     onChange={(e) =>
                       setNewEvent({ ...newEvent, start: e.target.value })

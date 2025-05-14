@@ -570,27 +570,27 @@ function Profile() {
             <div className="p-6">
               <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Username</p>
+                  <p className="text-sm font-medium text-gray-500 font-poppins">Username</p>
                   <p className="col-span-2 text-sm text-gray-900">{profile.username || 'Not provided'}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">First Name</p>
+                  <p className="text-sm font-medium text-gray-500 font-poppins">First Name</p>
                   <p className="col-span-2 text-sm text-gray-900">{profile.firstName || 'Not provided'}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Last Name</p>
+                  <p className="text-sm font-medium text-gray-500 font-poppins">Last Name</p>
                   <p className="col-span-2 text-sm text-gray-900">{profile.lastName || 'Not provided'}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Email</p>
+                  <p className="text-sm font-medium text-gray-500 font-poppins">Email</p>
                   <p className="col-span-2 text-sm text-gray-900">{profile.email || 'Not provided'}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Date of Birth</p>
+                  <p className="text-sm font-medium text-gray-500 font-poppins">Date of Birth</p>
                   <p className="col-span-2 text-sm text-gray-900">{formatDate(profile.dob)}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Gender</p>
+                  <p className="text-sm font-medium text-gray-500 font-poppins">Gender</p>
                   <p className="col-span-2 text-sm text-gray-900">{profile.gender || 'Not provided'}</p>
                 </div>
               </div>
@@ -604,15 +604,15 @@ function Profile() {
             <div className="p-6">
               <div className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Phone</p>
+                  <p className="text-sm font-medium text-gray-500 font-poppins">Phone</p>
                   <p className="col-span-2 text-sm text-gray-900">{profile.phone || 'Not provided'}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Address</p>
+                  <p className="text-sm font-medium text-gray-500 font-poppins">Address</p>
                   <p className="col-span-2 text-sm text-gray-900">{profile.address || 'Not provided'}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                  <p className="text-sm font-medium text-gray-500">Education (Years)</p>
+                  <p className="text-sm font-medium text-gray-500 font-poppins">Education (Years)</p>
                   <p className="col-span-2 text-sm text-gray-900">{profile.education || 'Not provided'}</p>
                 </div>
               </div>

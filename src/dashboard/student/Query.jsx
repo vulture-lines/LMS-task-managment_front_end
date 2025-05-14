@@ -113,7 +113,7 @@ function ChatSystem() {
   if (isMentor === null) {
     return (
       <>
-        <PageHeader title="Chat System" />
+        <PageHeader title="Chats" />
         <div className="p-4 bg-green-100 text-green-700 rounded-lg mb-4 mx-4">
           Loading...
         </div>
@@ -125,7 +125,7 @@ function ChatSystem() {
   if (isMentor === false || (isMentor === true && users.length === 0)) {
     return (
       <>
-        <PageHeader title="Chat System" />
+        <PageHeader title="Chats" />
         {error && (
           <div className="p-4 bg-red-100 text-red-700 rounded-lg mb-4 mx-4">
             {error}
@@ -215,7 +215,7 @@ function ChatSystem() {
   // Render mentor UI (full offull chat system with user list)
   return (
     <>
-      <PageHeader title="Chat System" />
+      <PageHeader title="Chats" />
       {error && (
         <div className="p-4 bg-red-100 text-red-700 rounded-lg mb-4 mx-4">
           {error}

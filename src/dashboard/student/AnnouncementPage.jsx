@@ -74,7 +74,7 @@ const AnnouncementList = () => {
                 <h2 className="text-xl font-bold text-gray-800 mb-2">
                   {announcement.title}
                   {announcement.isPinned && (
-                    <span className="ml-2 text-sm text-green-600 font-semibold">
+                    <span className="ml-2 text-sm text-green-600 font-semibold font-poppins">
                       [Pinned]
                     </span>
                   )}

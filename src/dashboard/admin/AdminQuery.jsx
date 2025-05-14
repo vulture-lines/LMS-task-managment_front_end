@@ -93,7 +93,7 @@ function ChatSystem() {
 
   return (
     <>
-      <PageHeader title="Chat System" />
+      <PageHeader title="Chats" />
       {error && (
         <div className="p-4 bg-red-100 text-red-700 rounded-lg mb-4 mx-4">
           {error}
