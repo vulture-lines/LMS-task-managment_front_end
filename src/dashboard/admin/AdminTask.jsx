@@ -753,7 +753,7 @@ const AdminTask = () => {
                         onChange={() => setSelectedUserType('admin')}
                         className="mr-2 focus:ring-purple-500"
                       />
-                      interrupts
+                     
                       <label htmlFor="userTypeAdmin" className="text-gray-700 font-poppins">
                         Admin
                       </label>
