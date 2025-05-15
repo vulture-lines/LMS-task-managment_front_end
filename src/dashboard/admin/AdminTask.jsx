@@ -234,18 +234,32 @@ const AdminTask = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value, checkboxes } = e.target;
-    if (name === 'selectedUser') {
-      setTaskData((prev) => ({
-        ...prev,
-        selectedUser: checked
-          ? [...prev.selectedUser, value]
-          : prev.selectedUser.filter((userId) => userId !== value),
-      }));
-    } else {
-      setTaskData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+  const { name, value, checked, type } = e.target;
+
+  if (name === 'selectedUser' && type === 'checkbox') {
+    setTaskData((prev) => ({
+      ...prev,
+      selectedUser: checked
+        ? [...prev.selectedUser, value]
+        : prev.selectedUser.filter((userId) => userId !== value),
+    }));
+  } else {
+    setTaskData((prev) => ({ ...prev, [name]: value }));
+  }
+};
+  // const handleChange = (e) => {
+  //   const { name, value, checkboxes } = e.target;
+  //   if (name === 'selectedUser'&& type === 'checkboxes') {
+  //     setTaskData((prev) => ({
+  //       ...prev,
+  //       selectedUser: checked
+  //         ? [...prev.selectedUser, value]
+  //         : prev.selectedUser.filter((userId) => userId !== value),
+  //     }));
+  //   } else {
+  //     setTaskData((prev) => ({ ...prev, [name]: value }));
+  //   }
+  // };
 
   const handleEditChange = (e) => {
     const { name, value, checked } = e.target;
