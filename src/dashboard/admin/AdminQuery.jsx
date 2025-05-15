@@ -141,7 +141,7 @@ function ChatSystem() {
         </div>
 
         {/* Chat Window */}
-        <div className="w-full md:w-3/4 bg-green-100 rounded-lg shadow border border-gray-300">
+        <div className="w-full md:w-3/4 bg-white rounded-lg shadow border border-gray-300">
           {selectedUser ? (
             <>
               <div className="p-4 border-b bg-gray-100 flex justify-between items-center">

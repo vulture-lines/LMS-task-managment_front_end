@@ -139,7 +139,7 @@ function ChatSystem() {
 
         <div className="mx-4">
           {/* Chat Window */}
-          <div className="w-full bg-green-100 rounded-lg shadow border border-gray-300">
+          <div className="w-full bg-white rounded-lg shadow border border-gray-300">
             <div className="p-4 border-b bg-gray-100 flex justify-between items-center">
               <div className="flex items-center">
                 <img
