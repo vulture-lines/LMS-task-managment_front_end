@@ -186,7 +186,7 @@ function UserManagement() {
     const { name, value } = e.target;
     const nameRegex = /^[a-zA-Z\s]*$/; // Allows letters and spaces for firstName, lastName, education
     const degreeNameRegex = /^[a-zA-Z\s.]*$/; // Allows letters, spaces, and periods for degreeName
-    const usernameRegex = /^[a-zA-Z]*$/; // Allows only letters for username
+    const usernameRegex = /^[a-zA-Z0-9_]*$/; // Allows only letters for username
     const phoneRegex = /^[6-9]\d{0,9}$/; // Allows 10 digits starting with 6-9
 
     // Validate input based on field
