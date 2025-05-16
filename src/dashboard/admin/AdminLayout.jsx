@@ -20,7 +20,7 @@ function AdminLayout() {
 
     {
       path: "/admin/task",
-      label: "task",
+      label: "Tasks",
       icon: <MdQueryBuilder className="h-5" />,
     },
  
