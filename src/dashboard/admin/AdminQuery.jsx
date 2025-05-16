@@ -12,7 +12,6 @@ function ChatSystem() {
   const messagesEndRef = useRef(null);
   const Token = JSON.parse(localStorage.getItem("loginData"));
 
-  // Default profile picture URL
   const defaultProfilePic = "https://t3.ftcdn.net/jpg/06/33/54/78/360_F_633547842_AugYzexTpMJ9z1YcpTKUBoqBF0CUCk10.jpg";
 
   // Redirect to login if not authenticated
@@ -27,13 +26,23 @@ function ChatSystem() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Fetch users
+  // Fetch users and their latest message timestamps
   useEffect(() => {
     const fetchUsers = async () => {
       setIsLoading(true);
       try {
         const response = await GetAllUsers();
-        setUsers(response.data || response);
+        const usersData = response.data || response;
+
+        // Assuming each user object now includes a `latestMessage` field with timestamp
+        // If not, you may need a separate API to fetch conversations
+        const sortedUsers = usersData.sort((a, b) => {
+          const timeA = a.latestMessage?.createdAt ? new Date(a.latestMessage.createdAt).getTime() : 0;
+          const timeB = b.latestMessage?.createdAt ? new Date(b.latestMessage.createdAt).getTime() : 0;
+          return timeB - timeA; // Sort descending (latest first)
+        });
+
+        setUsers(sortedUsers);
         setError(null);
       } catch (err) {
         setError(err.message || "Failed to load users");
@@ -64,7 +73,7 @@ function ChatSystem() {
     fetchMessages(user._id);
   };
 
-  // Handle sending a message
+  // Handle sending a message and update user list
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedUser) return;
@@ -75,7 +84,26 @@ function ChatSystem() {
         receiver: selectedUser._id,
         text: newMessage,
       });
-      setMessages([...messages, response.data]);
+
+      // Add the new message to the messages list
+      const newMsg = response.data;
+      setMessages([...messages, newMsg]);
+
+      // Update the user list with the new message timestamp
+      setUsers((prevUsers) => {
+        const updatedUsers = prevUsers.map((user) =>
+          user._id === selectedUser._id
+            ? { ...user, latestMessage: { createdAt: newMsg.createdAt, text: newMsg.text } }
+            : user
+        );
+        // Re-sort users based on the updated timestamp
+        return updatedUsers.sort((a, b) => {
+          const timeA = a.latestMessage?.createdAt ? new Date(a.latestMessage.createdAt).getTime() : 0;
+          const timeB = b.latestMessage?.createdAt ? new Date(b.latestMessage.createdAt).getTime() : 0;
+          return timeB - timeA;
+        });
+      });
+
       setNewMessage("");
       setError(null);
     } catch (err) {
@@ -129,8 +157,15 @@ function ChatSystem() {
                   <div className="flex-1">
                     <div className="flex justify-between items-center">
                       <span className="font-medium">{user.username}</span>
+                      {user.latestMessage?.createdAt && (
+                        <span className="text-xs text-gray-500">
+                          {new Date(user.latestMessage.createdAt).toLocaleTimeString()}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-sm text-gray-600">{user.email}</p>
+                    <p className="text-sm text-gray-600">
+                      {user.latestMessage?.text || user.email}
+                    </p>
                   </div>
                 </div>
               ))
@@ -175,20 +210,20 @@ function ChatSystem() {
                     <div
                       key={msg._id}
                       className={`mb-4 flex ${
-                        msg.sender._id === Token?.user?._id ? "justify-end" : "justify-start"
+                        msg.sender === Token?.user?._id ? "justify-end" : "justify-start"
                       }`}
                     >
                       <div className="flex items-start">
-                        {msg.sender._id !== Token?.user?._id && (
+                        {msg.sender !== Token?.user?._id && (
                           <img
-                            src={msg.sender.profilePicture || defaultProfilePic}
-                            alt={`${msg.sender.username}'s profile`}
+                            src={selectedUser.profilePicture || defaultProfilePic}
+                            alt={`${selectedUser.username}'s profile`}
                             className="w-8 h-8 rounded-full mr-2 mt-1 object-cover"
                           />
                         )}
                         <div
                           className={`max-w-xs md:max-w-md p-3 rounded-lg ${
-                            msg.sender._id === Token?.user?._id
+                            msg.sender === Token?.user?._id
                               ? "bg-green-600 text-white"
                               : "bg-gray-200 text-gray-800"
                           }`}

@@ -18,7 +18,7 @@ function ChatSystem() {
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!Token?.token) {
+    if (!Token?.token || !Token?.user?._id) {
       window.location.href = "/login";
     }
   }, []);
@@ -156,20 +156,20 @@ function ChatSystem() {
                   <div
                     key={msg._id}
                     className={`mb-4 flex ${
-                      msg.sender._id === Token?.user?._id ? "justify-end" : "justify-start"
+                      msg.sender === Token?.user?._id ? "justify-end" : "justify-start"
                     }`}
                   >
                     <div className="flex items-start">
-                      {msg.sender._id !== Token?.user?._id && (
+                      {msg.sender !== Token?.user?._id && (
                         <img
-                          src={msg.sender.profilePicture || defaultProfilePic}
-                          alt={`${msg.sender.username}'s profile`}
+                          src={Token?.user?.profilePicture || defaultProfilePic}
+                          alt="Profile"
                           className="w-8 h-8 rounded-full mr-2 mt-1 object-cover"
                         />
                       )}
                       <div
                         className={`max-w-xs md:max-w-md p-3 rounded-lg ${
-                          msg.sender._id === Token?.user?._id
+                          msg.sender === Token?.user?._id
                             ? "bg-green-600 text-white"
                             : "bg-gray-200 text-gray-800"
                         }`}
@@ -179,6 +179,13 @@ function ChatSystem() {
                           {new Date(msg.createdAt).toLocaleTimeString()}
                         </p>
                       </div>
+                      {msg.sender === Token?.user?._id && (
+                        <img
+                          src={Token?.user?.profilePicture || defaultProfilePic}
+                          alt={`${Token?.user?.username}'s profile`}
+                          className="w-8 h-8 rounded-full ml-2 mt-1 object-cover"
+                        />
+                      )}
                     </div>
                   </div>
                 ))
@@ -212,7 +219,7 @@ function ChatSystem() {
     );
   }
 
-  // Render mentor UI (full offull chat system with user list)
+  // Render mentor UI (full chat system with user list)
   return (
     <>
       <PageHeader title="Chats" />
@@ -293,20 +300,20 @@ function ChatSystem() {
                     <div
                       key={msg._id}
                       className={`mb-4 flex ${
-                        msg.sender._id === Token?.user?._id ? "justify-end" : "justify-start"
+                        msg.sender === Token?.user?._id ? "justify-end" : "justify-start"
                       }`}
                     >
                       <div className="flex items-start">
-                        {msg.sender._id !== Token?.user?._id && (
+                        {msg.sender !== Token?.user?._id && (
                           <img
-                            src={msg.sender.profilePicture || defaultProfilePic}
-                            alt={`${msg.sender.username}'s profile`}
+                            src={selectedUser.profilePicture || defaultProfilePic}
+                            alt={`${selectedUser.username}'s profile`}
                             className="w-8 h-8 rounded-full mr-2 mt-1 object-cover"
                           />
                         )}
                         <div
                           className={`max-w-xs md:max-w-md p-3 rounded-lg ${
-                            msg.sender._id === Token?.user?._id
+                            msg.sender === Token?.user?._id
                               ? "bg-green-600 text-white"
                               : "bg-gray-200 text-gray-800"
                           }`}
@@ -316,6 +323,13 @@ function ChatSystem() {
                             {new Date(msg.createdAt).toLocaleTimeString()}
                           </p>
                         </div>
+                        {msg.sender === Token?.user?._id && (
+                          <img
+                            src={Token?.user?.profilePicture || defaultProfilePic}
+                            alt={`${Token?.user?.username}'s profile`}
+                            className="w-8 h-8 rounded-full ml-2 mt-1 object-cover"
+                          />
+                        )}
                       </div>
                     </div>
                   ))
