@@ -24,13 +24,15 @@ jobs:
     - name: Build frontend
       run: npm run build
 
-    - name: Clean remote folder & fix permissions
+    - name: Ensure remote folder & fix permissions
       uses: appleboy/ssh-action@v0.1.10
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
+          echo "Creating target folder if it doesn't exist..."
+          sudo mkdir -p /var/www/html/LMS_frontend
           sudo rm -rf /var/www/html/LMS_frontend/*
           sudo chown -R ${{ secrets.EC2_USERNAME }}:www-data /var/www/html/LMS_frontend
           sudo chmod -R 775 /var/www/html/LMS_frontend
