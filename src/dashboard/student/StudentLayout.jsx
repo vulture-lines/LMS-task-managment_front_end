@@ -42,7 +42,7 @@ function StudentLayout() {
     // },
     {
       path: "/student/progressReport",
-      label: "Course Progress Report",
+      label: "Task Progress Report",
       icon: <ClipboardCheck className="h-5" />,
     },
     
