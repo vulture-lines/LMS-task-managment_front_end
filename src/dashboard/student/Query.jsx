@@ -259,7 +259,7 @@ function ChatSystem() {
         </div>
 
         {/* Chat Window */}
-        <div className="w-full md:w-3/4 bg-green-100 rounded-lg shadow border border-gray-300">
+        <div className="w-full md:w-3/4 bg-white rounded-lg shadow border border-gray-300">
           {selectedUser ? (
             <>
               <div className="p-4 border-b bg-gray-100 flex justify-between items-center">
@@ -269,7 +269,7 @@ function ChatSystem() {
                     alt={`${selectedUser.username}'s profile`}
                     className="w-8 h-8 rounded-full mr-2 object-cover"
                   />
-                  <h2 className="text-lg font-medium">Chat with {selectedUser.username}</h2>
+                  <h2 className="text-lg font-medium">{selectedUser.username}</h2>
                 </div>
                 <div className="flex gap-2">
                   <button

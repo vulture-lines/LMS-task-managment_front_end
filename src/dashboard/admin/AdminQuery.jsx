@@ -151,7 +151,7 @@ function ChatSystem() {
                     alt={`${selectedUser.username}'s profile`}
                     className="w-8 h-8 rounded-full mr-2 object-cover"
                   />
-                  <h2 className="text-lg font-medium">Chat with {selectedUser.username}</h2>
+                  <h2 className="text-lg font-medium">{selectedUser.username}</h2>
                 </div>
                 <div className="flex gap-2">
                   <button
