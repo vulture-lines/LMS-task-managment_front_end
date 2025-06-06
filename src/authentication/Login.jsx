@@ -1,9 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Loader } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { AuthLogin, AuthRegister, AuthGoogleLogin, AuthGoogleSignup } from "../service/api";
+import {
+  AuthLogin,
+  AuthRegister,
+  AuthGoogleLogin,
+  AuthGoogleSignup,
+  baseUrl1,
+} from "../service/api";
 import { useNavigate } from "react-router";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+
+const API_URL = `${baseUrl1}`; // Your API endpoint
+// const API_URL = "http://localhost:5000";
+
+const getDaysInMonth = (year, month) => {
+  const date = new Date(year, month, 1);
+  const days = [];
+  while (date.getMonth() === month) {
+    days.push(new Date(date));
+    date.setDate(date.getDate() + 1);
+  }
+  return days;
+};
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,6 +32,53 @@ const Login = () => {
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [validationMessages, setValidationMessages] = useState([]);
+
+  const today = new Date();
+  const [month, setMonth] = useState(today.getMonth());
+  const [year, setYear] = useState(today.getFullYear());
+  const [signupData, setSignupData] = useState([]);
+
+  const currentMonthKey = `${year}-${String(month + 1).padStart(2, "0")}`;
+  const days = getDaysInMonth(year, month);
+  const startDay = new Date(year, month, 1).getDay();
+  const todayStr = today.toISOString().split("T")[0];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/signuplimit`);
+        const data = await res.json();
+        setSignupData(data);
+      } catch (err) {
+        console.error("Failed to fetch signup data", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const monthData = signupData.find((m) => m.month === currentMonthKey);
+  const isMonthFull = monthData?.count >= 100;
+
+  const nextMonth = () => {
+    setMonth((prev) => {
+      if (prev === 11) {
+        setYear((y) => y + 1);
+        return 0;
+      }
+      return prev + 1;
+    });
+  };
+
+  const prevMonth = () => {
+    setMonth((prev) => {
+      if (prev === 0) {
+        setYear((y) => y - 1);
+        return 11;
+      }
+      return prev - 1;
+    });
+  };
 
   const images = [
     {
@@ -134,160 +200,128 @@ const Login = () => {
   // Handle Google Login (auth-code flow)
   const handleGoogleLogin = useGoogleLogin({
     flow: "auth-code",
-  redirect_uri: window.location.origin,
-  onSuccess: async (codeResponse) => {
-    setLoading(true);
-    setValidationMessages([]);
-    try {
-      // Try to sign up with the Google code
-      const res = await AuthGoogleSignup({ code: codeResponse.code });
+    redirect_uri: window.location.origin,
+    onSuccess: async (codeResponse) => {
+      setLoading(true);
+      setValidationMessages([]);
+      try {
+        // Try to sign up with the Google code
+        const res = await AuthGoogleSignup({ code: codeResponse.code });
 
-      // Check if the response contains a user object and the approval status
-      if (res && res.user && !res.user.isApproved) {
-        // If the user is not approved, show a message and redirect them to the login page
+        // Check if the response contains a user object and the approval status
+        if (res && res.user && !res.user.isApproved) {
+          // If the user is not approved, show a message and redirect them to the login page
+          setValidationMessages((prev) => [
+            ...prev,
+            {
+              text: "Account successfully created. Your account is pending approval.",
+              type: "info",
+            },
+          ]);
+          localStorage.setItem("signupData", JSON.stringify(res)); // Store signup data temporarily
+          navigate("/login"); // Redirect to login page
+        } else {
+          // If the user is approved, log them in
+          localStorage.setItem("loginData", JSON.stringify(res));
+          setValidationMessages((prev) => [
+            ...prev,
+            {
+              text: "Successfully signed up and logged in with Google!",
+              type: "success",
+            },
+          ]);
+          setTimeout(() => {
+            if (res.user.role === "Mentor") {
+              navigate("/admin");
+              window.location.reload();
+            } else if (res.user.role === "Student") {
+              navigate("/student");
+              window.location.reload();
+            }
+          }, 1000);
+        }
+      } catch (error) {
+        const errorMessages = Array.isArray(error.message)
+          ? error.message
+          : [error.message || "Google signup failed. Please try again."];
         setValidationMessages((prev) => [
           ...prev,
-          { text: "Account successfully created. Your account is pending approval.", type: "info" },
+          ...errorMessages.map((msg) => ({ text: msg, type: "error" })),
         ]);
-        localStorage.setItem("signupData", JSON.stringify(res)); // Store signup data temporarily
-        navigate("/login");  // Redirect to login page
-      } else {
-        // If the user is approved, log them in
-        localStorage.setItem("loginData", JSON.stringify(res));
-        setValidationMessages((prev) => [
-          ...prev,
-          { text: "Successfully signed up and logged in with Google!", type: "success" },
-        ]);
-         setTimeout(() => {
-          if (res.user.role === "Mentor") {
-            navigate("/admin");
-            window.location.reload();
-          } else if (res.user.role === "Student") {
-            navigate("/student");
-            window.location.reload();
-          }
-        }, 1000);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      const errorMessages = Array.isArray(error.message)
-        ? error.message
-        : [error.message || "Google signup failed. Please try again."];
+    },
+    onError: () => {
       setValidationMessages((prev) => [
         ...prev,
-        ...errorMessages.map((msg) => ({ text: msg, type: "error" })),
+        { text: "Google signup failed. Please try again.", type: "error" },
       ]);
-    } finally {
-      setLoading(false);
-    }
-  },
-  onError: () => {
-    setValidationMessages((prev) => [
-      ...prev,
-      { text: "Google signup failed. Please try again.", type: "error" },
-    ]);
-  },
-});
-
-  //   flow: "auth-code",
-  //   redirect_uri: window.location.origin,
-  //   onSuccess: async (codeResponse) => {
-  //     setLoading(true);
-  //     setValidationMessages([]);
-  //     try {
-  //       const res = await AuthGoogleLogin({ code: codeResponse.code });
-  //       localStorage.setItem("loginData", JSON.stringify(res));
-  //       setValidationMessages((prev) => [
-  //         ...prev,
-  //         { text: "Successfully logged in with Google", type: "success" },
-  //       ]);
-  //       setTimeout(() => {
-  //         if (res.user.role === "Mentor") {
-  //           navigate("/admin");
-  //           window.location.reload();
-  //         } else if (res.user.role === "Student") {
-  //           navigate("/student");
-  //           window.location.reload();
-  //         }
-  //       }, 1000);
-  //     } catch (error) {
-  //       const errorMessages = Array.isArray(error.message)
-  //         ? error.message
-  //         : [error.message || "Google login failed. Please try again."];
-  //       setValidationMessages((prev) => [
-  //         ...prev,
-  //         ...errorMessages.map((msg) => ({ text: msg, type: "error" })),
-  //       ]);
-  //       localStorage.removeItem("loginData");
-  //       localStorage.clear();
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   },
-  //   onError: () => {
-  //     setValidationMessages((prev) => [
-  //       ...prev,
-  //       { text: "Google login failed. Please try again.", type: "error" },
-  //     ]);
-  //   },
-  // });
+    },
+  });
 
   // Handle Google Signup (auth-code flow)
   const handleGoogleSignup = useGoogleLogin({
-  flow: "auth-code",
-  redirect_uri: window.location.origin,
-  onSuccess: async (codeResponse) => {
-    setLoading(true);
-    setValidationMessages([]);
-    try {
-      // Try to sign up with the Google code
-      const res = await AuthGoogleSignup({ code: codeResponse.code });
+    flow: "auth-code",
+    redirect_uri: window.location.origin,
+    onSuccess: async (codeResponse) => {
+      setLoading(true);
+      setValidationMessages([]);
+      try {
+        // Try to sign up with the Google code
+        const res = await AuthGoogleSignup({ code: codeResponse.code });
 
-      // Check if the response contains a user object and the approval status
-      if (res && res.user && !res.user.isApproved) {
-        // If the user is not approved, show a message and redirect them to the login page
+        // Check if the response contains a user object and the approval status
+        if (res && res.user && !res.user.isApproved) {
+          // If the user is not approved, show a message and redirect them to the login page
+          setValidationMessages((prev) => [
+            ...prev,
+            {
+              text: "Account successfully created. Your account is pending approval.",
+              type: "info",
+            },
+          ]);
+          localStorage.setItem("signupData", JSON.stringify(res)); // Store signup data temporarily
+          navigate("/login"); // Redirect to login page
+        } else {
+          // If the user is approved, log them in
+          localStorage.setItem("loginData", JSON.stringify(res));
+          setValidationMessages((prev) => [
+            ...prev,
+            {
+              text: "Successfully signed up and logged in with Google!",
+              type: "success",
+            },
+          ]);
+          setTimeout(() => {
+            if (res.user.role === "Mentor") {
+              navigate("/admin");
+              window.location.reload();
+            } else if (res.user.role === "Student") {
+              navigate("/student");
+              window.location.reload();
+            }
+          }, 1000);
+        }
+      } catch (error) {
+        const errorMessages = Array.isArray(error.message)
+          ? error.message
+          : [error.message || "Google signup failed. Please try again."];
         setValidationMessages((prev) => [
           ...prev,
-          { text: "Account successfully created. Your account is pending approval.", type: "info" },
+          ...errorMessages.map((msg) => ({ text: msg, type: "error" })),
         ]);
-        localStorage.setItem("signupData", JSON.stringify(res)); // Store signup data temporarily
-        navigate("/login");  // Redirect to login page
-      } else {
-        // If the user is approved, log them in
-        localStorage.setItem("loginData", JSON.stringify(res));
-        setValidationMessages((prev) => [
-          ...prev,
-          { text: "Successfully signed up and logged in with Google!", type: "success" },
-        ]);
-         setTimeout(() => {
-          if (res.user.role === "Mentor") {
-            navigate("/admin");
-            window.location.reload();
-          } else if (res.user.role === "Student") {
-            navigate("/student");
-            window.location.reload();
-          }
-        }, 1000);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      const errorMessages = Array.isArray(error.message)
-        ? error.message
-        : [error.message || "Google signup failed. Please try again."];
+    },
+    onError: () => {
       setValidationMessages((prev) => [
         ...prev,
-        ...errorMessages.map((msg) => ({ text: msg, type: "error" })),
+        { text: "Google signup failed. Please try again.", type: "error" },
       ]);
-    } finally {
-      setLoading(false);
-    }
-  },
-  onError: () => {
-    setValidationMessages((prev) => [
-      ...prev,
-      { text: "Google signup failed. Please try again.", type: "error" },
-    ]);
-  },
-});
-
+    },
+  });
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -469,11 +503,18 @@ const Login = () => {
                         required: "Username or Email is required",
                         validate: (value) => {
                           const usernameRegex = /^[A-Za-z0-9\s]+$/;
-                          const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                          if (!usernameRegex.test(value) && !emailRegex.test(value)) {
+                          const emailRegex =
+                            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                          if (
+                            !usernameRegex.test(value) &&
+                            !emailRegex.test(value)
+                          ) {
                             return "Please enter a valid username (alphanumeric, 3-20 characters) or email";
                           }
-                          if (usernameRegex.test(value) && (value.length < 3 || value.length > 20)) {
+                          if (
+                            usernameRegex.test(value) &&
+                            (value.length < 3 || value.length > 20)
+                          ) {
                             return "Username must be between 3 and 20 characters";
                           }
                           return true;
@@ -525,7 +566,10 @@ const Login = () => {
                     )}
 
                     <div className="text-right text-sm mb-6">
-                      <a href="/forgotpassword" className="text-blue-500 hover:underline">
+                      <a
+                        href="/forgotpassword"
+                        className="text-blue-500 hover:underline"
+                      >
                         Forgot password?
                       </a>
                     </div>
@@ -643,12 +687,15 @@ const Login = () => {
                       type="email"
                       placeholder="Email"
                       className={`w-full border ${
-                        signupErrors.email ? "border-red-500" : "border-gray-300"
+                        signupErrors.email
+                          ? "border-red-500"
+                          : "border-gray-300"
                       } rounded-md p-3 mb-2`}
                       {...signupRegister("email", {
                         required: "Email is required",
                         pattern: {
-                          value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                          value:
+                            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
                           message: "Invalid email address",
                         },
                       })}
@@ -678,7 +725,9 @@ const Login = () => {
                       />
                       <button
                         type="button"
-                        onClick={() => setShowSignupPassword(!showSignupPassword)}
+                        onClick={() =>
+                          setShowSignupPassword(!showSignupPassword)
+                        }
                         className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500"
                         aria-label={
                           showSignupPassword ? "Hide password" : "Show password"
@@ -723,35 +772,115 @@ const Login = () => {
             </div>
           )}
 
-          <div
-            className="hidden md:block md:w-1/2 bg-cover bg-center"
-            style={{ backgroundImage: `url(${images[currentImageIndex].url})` }}
-          >
-            <div className="flex flex-col justify-between h-full p-6 text-white">
-              <div className="flex justify-end gap-4">
-                <button
-                  className="border px-4 py-1 rounded-full text-sm hover:bg-white hover:text-black transition"
-                  onClick={() => {
-                    setShowWelcomeScreen(false);
-                    setShowSignup(true);
-                    setValidationMessages([]);
-                  }}
-                >
-                  Sign Up
-                </button>
-                <button className="px-4 py-1 rounded-full text-sm hover:bg-white hover:text-black transition">
-                  Join Us
-                </button>
+          {/* Right Section */}
+          <div className="hidden md:block md:w-1/2">
+            {showSignup ? (
+              // Calendar for signup
+              <div className="bg-white p-8 flex justify-center items-center border-l h-full">
+                <div className="rounded-xl w-full max-w-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <button
+                      onClick={prevMonth}
+                      className="text-lg font-semibold text-gray-600 hover:text-black"
+                    >
+                      &larr;
+                    </button>
+                    <h3 className="text-xl font-bold text-gray-800">
+                      {new Date(year, month).toLocaleString("default", {
+                        month: "long",
+                      })}{" "}
+                      {year}
+                    </h3>
+                    <button
+                      onClick={nextMonth}
+                      className="text-lg font-semibold text-gray-600 hover:text-black"
+                    >
+                      &rarr;
+                    </button>
+                  </div>
+
+                  {/* Weekdays */}
+                  <div className="grid grid-cols-7 gap-1 text-center text-sm">
+                    {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
+                      <div key={day} className="font-semibold text-gray-500">
+                        {day}
+                      </div>
+                    ))}
+
+                    {Array(startDay)
+                      .fill("")
+                      .map((_, i) => (
+                        <div key={"empty-" + i}></div>
+                      ))}
+
+                    {days.map((date) => {
+                      const formatted = date.toISOString().split("T")[0];
+                      const isToday = formatted === todayStr;
+                      const isPast = date < today;
+
+                      let className =
+                        "w-10 h-10 flex items-center justify-center rounded-md transition";
+
+                      if (isMonthFull) {
+                        if (isToday) {
+                          className += " bg-gray-300 text-gray-500";
+                        } else {
+                          className += " text-gray-500";
+                        }
+                      } else {
+                        if (isToday) {
+                          className += " bg-green-600 text-white font-semibold";
+                        } else if (isPast) {
+                          className += " text-gray-500";
+                        } else {
+                          className += " text-green-600 font-semibold";
+                        }
+                      }
+
+                      return (
+                        <div key={formatted} className={className}>
+                          {date.getDate()}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
-              <div>
-                <h2
-                  className="text-xl md:text-2xl font-semibold max-w-xs mb-2 transition-opacity duration-700"
-                  dangerouslySetInnerHTML={{
-                    __html: images[currentImageIndex].text,
-                  }}
-                />
+            ) : (
+              // Sliding images for login and welcome
+              <div
+                className="bg-cover bg-center h-full"
+                style={{
+                  backgroundImage: `url(${images[currentImageIndex].url})`,
+                }}
+              >
+                <div className="flex flex-col justify-between h-full p-6 text-white">
+                  <div className="flex justify-end gap-4">
+                    <button
+                      className="border px-4 py-1 rounded-full text-sm hover:bg-white hover:text-black transition"
+                      onClick={() => {
+                        setShowWelcomeScreen(false);
+                        setShowSignup(true);
+                        setValidationMessages([]);
+                      }}
+                    >
+                      Sign Up
+                    </button>
+                    <button className="px-4 py-1 rounded-full text-sm hover:bg-white hover:text-black transition">
+                      Join Us
+                    </button>
+                  </div>
+                  <div>
+                    <h2
+                      className="text-xl md:text-2xl font-semibold max-w-xs mb-2 transition-opacity duration-700"
+                      dangerouslySetInnerHTML={{
+                        __html: images[currentImageIndex].text,
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
