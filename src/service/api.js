@@ -1,6 +1,6 @@
 import axios from "axios";
-const baseUrl = "https://lms-course-api-7xf3.onrender.com";
-export const baseUrl1 = "https://lms-course-api-7xf3.onrender.com";
+const baseUrl = "https://lms-task-api.onrender.com";
+export const baseUrl1 = "https://lms-task-api.onrender.com";
 const Token = JSON.parse(localStorage.getItem("loginData"));
 
 axios.defaults.headers.common["Authorization"] = `Bearer ${Token?.token}`;
