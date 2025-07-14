@@ -1,7 +1,7 @@
 import axios from "axios";
 // const baseUrl = "https://tms.lawcoach.in/api";
-const baseUrl = "http://localhost:5000";
-export const baseUrl1 = "http://localhost:5000";
+const baseUrl = "https://lms-task-api.onrender.com";
+export const baseUrl1 = "https://lms-task-api.onrender.com";
 const Token = JSON.parse(localStorage.getItem("loginData"));
 
 axios.defaults.headers.common["Authorization"] = `Bearer ${Token?.token}`;
